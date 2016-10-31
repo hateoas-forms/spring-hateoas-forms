@@ -117,4 +117,62 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!-- who the developers are for the project -->
+	<developers>
+		<developer>
+			<name>Xabier Aldama</name>
+			<id>xaldama</id>
+			<email>xabier at hdivsecurity.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Gotzon Illarramendi</name>
+			<id>gillarramendi</id>
+			<email>gotzon at hdivsecurity.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Joseba Ander Ruiz Ayesta</name>
+			<id>anderruiz</id>
+			<email>ander at hdivsecurity.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments />
+		</license>
+	</licenses>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>oss-staging</id>
+			<name>OSS Staging repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<uniqueVersion>true</uniqueVersion>
+			<id>oss-snapshot</id>
+			<name>OSS Snapshot repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<scm>
+		<connection>scm:git:git://github.com/hateoas-forms/spring-hateoas-forms.git</connection>
+		<developerConnection>scm:git:git://github.com/hateoas-forms/spring-hateoas-forms.git</developerConnection>
+		<url>git@github.com:hateoas-forms/spring-hateoas-forms.git</url>
+	</scm>
 </project>
