@@ -78,8 +78,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * are used to fill up potentially available path variables in the class scope request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
-	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be {@literal
-	 * null}.
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be {@literal null}.
 	 * @return builder
 	 */
 	public static AffordanceBuilder linkTo(final Class<?> controller, final Object... parameters) {

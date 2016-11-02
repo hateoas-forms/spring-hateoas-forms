@@ -32,6 +32,7 @@ public interface Suggest<T> {
 	/**
 	 * Returns the original value, it may be equals to getValue() or not (i.e. Enums), in this case the real value is returned
 	 * 
+	 * @param <U> Unwrapped type.
 	 * @return the unwrapped value
 	 */
 	<U> U getUnwrappedValue();
