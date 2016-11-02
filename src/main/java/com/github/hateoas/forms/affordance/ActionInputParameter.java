@@ -54,8 +54,6 @@ public interface ActionInputParameter {
 	 * Set the type of parameter when used in html-like contexts (e.g. Siren, Uber, XHtml)
 	 * 
 	 * @param type the {@link Type} to set
-	 *
-	 * @return type the {@link Type}
 	 */
 	void setHtmlInputFieldType(Type type);
 
@@ -106,6 +104,7 @@ public interface ActionInputParameter {
 	 * Gets possible values for this parameter.
 	 *
 	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
+	 * @param <T> This is the type parameter
 	 * @return possible values or empty array
 	 */
 	<T> List<Suggest<T>> getPossibleValues(ActionDescriptor actionDescriptor);
@@ -113,21 +112,22 @@ public interface ActionInputParameter {
 	/**
 	 * Establish possible values for this parameter
 	 * 
-	 * @param possibleValues
+	 * @param possibleValues possible values for this parameter.
+	 * @param <T> This is the type parameter
 	 */
 	<T> void setPossibleValues(List<Suggest<T>> possibleValues);
 
 	/**
 	 * Retrieve the suggest type
 	 * 
-	 * @return
+	 * @return the {@link SuggestType}
 	 */
 	SuggestType getSuggestType();
 
 	/**
 	 * Sets the suggest type
 	 * 
-	 * @param type
+	 * @param type the {@link SuggestType} to set.
 	 */
 	void setSuggestType(SuggestType type);
 
@@ -164,14 +164,14 @@ public interface ActionInputParameter {
 	/**
 	 * Name of parameter.
 	 *
-	 * @return
+	 * @return the name of parameter.
 	 */
 	String getParameterName();
 
 	/**
 	 * Type of parameter.
 	 *
-	 * @return
+	 * @return the type of parameter.
 	 */
 	Class<?> getParameterType();
 
