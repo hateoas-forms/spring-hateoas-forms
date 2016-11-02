@@ -53,13 +53,13 @@ public class AffordanceBuilder implements LinkBuilder {
 
 	private final PartialUriTemplateComponents partialUriTemplateComponents;
 
-	private final List<ActionDescriptor> actionDescriptors = new ArrayList<ActionDescriptor>();
+	private final List<ActionDescriptor> actionDescriptors = new ArrayList<>();
 
-	private final MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<>();
 
-	private final List<String> rels = new ArrayList<String>();
+	private final List<String> rels = new ArrayList<>();
 
-	private final List<String> reverseRels = new ArrayList<String>();
+	private final List<String> reverseRels = new ArrayList<>();
 
 	private TypedResource collectionHolder;
 
@@ -88,6 +88,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	/**
 	 * @param method must not be {@literal null}.
 	 * @param parameters additional parameters.
+	 * @return builder
 	 * 
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
@@ -108,6 +109,10 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
+	 * @param controller the class to discover the annotation on, must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be {@literal null}.
+	 * @return builder
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class, Method, Object...)
 	 */
 	public static AffordanceBuilder linkTo(final Class<?> controller, final Method method, final Object... parameters) {
@@ -368,7 +373,7 @@ public class AffordanceBuilder implements LinkBuilder {
 		final String fragmentIdentifier = StringUtils.hasText(urlPartComponents.getFragmentIdentifier())
 				? urlPartComponents.getFragmentIdentifier() : affordanceComponents.getFragmentIdentifier();
 
-		List<String> variableNames = new ArrayList<String>();
+		List<String> variableNames = new ArrayList<>();
 		variableNames.addAll(affordanceComponents.getVariableNames());
 		variableNames.addAll(urlPartComponents.getVariableNames());
 		final PartialUriTemplateComponents mergedUriComponents = new PartialUriTemplateComponents(path, queryHead, queryTail,

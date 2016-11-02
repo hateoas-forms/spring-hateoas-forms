@@ -27,9 +27,9 @@ public class RemoteOptions implements Options<String> {
 			super(AffordanceBuilder.methodOn(DummyController.class).searchMethod(....), "id", "name");
 	 *	   }
 	 *	}
-	 * @param lastInvocation
-	 * @param idField
-	 * @param textField
+	 * @param lastInvocation Last method invocation value
+	 * @param idField Field in the object that represents its ID
+	 * @param textField Field in the object that represents the printable description
 	 */
 	//@formatter:on
 	public RemoteOptions(final Object lastInvocation, final String idField, final String textField) {
