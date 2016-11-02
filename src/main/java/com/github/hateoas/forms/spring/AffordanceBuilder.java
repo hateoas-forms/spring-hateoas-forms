@@ -44,19 +44,23 @@ import com.github.hateoas.forms.affordance.PartialUriTemplateComponents;
 import com.github.hateoas.forms.affordance.TypedResource;
 
 /**
- * Builder for hypermedia affordances, usable as rfc-5988 web links and optionally holding information about request
- * body requirements. Created by dschulten on 07.09.2014.
+ * Builder for hypermedia affordances, usable as rfc-5988 web links and optionally holding information about request body requirements.
+ * Created by dschulten on 07.09.2014.
  */
 public class AffordanceBuilder implements LinkBuilder {
 
 	private static final AffordanceBuilderFactory FACTORY = new AffordanceBuilderFactory();
 
 	private final PartialUriTemplateComponents partialUriTemplateComponents;
+
 	private final List<ActionDescriptor> actionDescriptors = new ArrayList<ActionDescriptor>();
 
 	private final MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<String, String>();
+
 	private final List<String> rels = new ArrayList<String>();
+
 	private final List<String> reverseRels = new ArrayList<String>();
+
 	private TypedResource collectionHolder;
 
 	/**
@@ -70,12 +74,11 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class. The
-	 * additional parameters are used to fill up potentially available path variables in the class scope request mapping.
+	 * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class. The additional parameters
+	 * are used to fill up potentially available path variables in the class scope request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
-	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
-	 *          {@literal
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be {@literal
 	 * null}.
 	 * @return builder
 	 */
@@ -84,6 +87,9 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
+	 * @param method must not be {@literal null}.
+	 * @param parameters additional parameters.
+	 * 
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
 	public static AffordanceBuilder linkTo(final Method method, final Object... parameters) {
@@ -91,12 +97,11 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class. The
-	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
+	 * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class. The additional parameters
+	 * are used to fill up potentially available path variables in the class scop request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
-	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
-	 *          {@literal null}.
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be {@literal null}.
 	 * @return builder
 	 */
 	public static AffordanceBuilder linkTo(final Class<?> controller, final Map<String, ?> parameters) {
@@ -111,8 +116,8 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Creates a {@link AffordanceBuilder} pointing to a controller method. Hand in a dummy method invocation result you
-	 * can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * Creates a {@link AffordanceBuilder} pointing to a controller method. Hand in a dummy method invocation result you can create via
+	 * {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 * 
 	 * <pre>
 	 * &#64;RequestMapping("/customers")
@@ -123,9 +128,8 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
 	 * 
-	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
-	 * {@code addresses}. For more details on the method invocation constraints, see
-	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of {@code addresses}. For more
+	 * details on the method invocation constraints, see {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 *
 	 * @param methodInvocation to use for link building
 	 * @return builder
@@ -181,8 +185,8 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * Builds affordance with one or multiple rels which must have been defined previously using {@link #rel(String)} or
 	 * {@link #reverseRel(String, String)}.
 	 * <p>
-	 * The motivation for multiple rels is this statement in the web linking rfc-5988: &quot;Note that link-values can
-	 * convey multiple links between the same target and context IRIs; for example:
+	 * The motivation for multiple rels is this statement in the web linking rfc-5988: &quot;Note that link-values can convey multiple links
+	 * between the same target and context IRIs; for example:
 	 * </p>
 	 * 
 	 * <pre>
@@ -200,8 +204,7 @@ public class AffordanceBuilder implements LinkBuilder {
 		Assert.state(!(rels.isEmpty() && reverseRels.isEmpty()),
 				"no rels or reverse rels found, call rel() or rev() before building the affordance");
 		final Affordance affordance;
-		affordance = new Affordance(new PartialUriTemplate(toString()), actionDescriptors,
-				rels.toArray(new String[rels.size()]));
+		affordance = new Affordance(new PartialUriTemplate(toString()), actionDescriptors, rels.toArray(new String[rels.size()]));
 		for (Map.Entry<String, List<String>> linkParamEntry : linkParams.entrySet()) {
 			final List<String> values = linkParamEntry.getValue();
 			for (String value : values) {
@@ -216,18 +219,17 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988), where the resource that has the
-	 * affordance will be considered the object in a subject-predicate-object statement.
+	 * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988), where the resource that has the affordance will
+	 * be considered the object in a subject-predicate-object statement.
 	 * <p>
-	 * E.g. if you had a rel <code>ex:parent</code> which connects a child to its father, you could also use ex:parent on
-	 * the father to point to the child by reverting the direction of ex:parent. This is mainly useful when you have no
-	 * other way to express in your context that the direction of a relationship is inverted.
+	 * E.g. if you had a rel <code>ex:parent</code> which connects a child to its father, you could also use ex:parent on the father to
+	 * point to the child by reverting the direction of ex:parent. This is mainly useful when you have no other way to express in your
+	 * context that the direction of a relationship is inverted.
 	 * </p>
 	 *
 	 * @param rev to be used as reverse relationship
 	 * @param revertedRel to be used in contexts which have no notion of reverse relationships. E.g. for a reverse rel
-	 *          <code>ex:parent</code> you can use a made-up rel name <code>ex:child</code> which will be used as rel when
-	 *          rendering HAL.
+	 * <code>ex:parent</code> you can use a made-up rel name <code>ex:child</code> which will be used as rel when rendering HAL.
 	 * @return builder
 	 */
 	public AffordanceBuilder reverseRel(final String rev, final String revertedRel) {
@@ -237,9 +239,9 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988) to collections in cases where
-	 * the resource that has the affordance is not the object in a subject-predicate-object statement about each
-	 * collection item. See {@link #rel(TypedResource, String)} for explanation.
+	 * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988) to collections in cases where the resource that
+	 * has the affordance is not the object in a subject-predicate-object statement about each collection item. See
+	 * {@link #rel(TypedResource, String)} for explanation.
 	 *
 	 * @param rev to be used as reverse relationship
 	 * @param revertedRel to be used in contexts which have no notion of reverse relationships, e.g. HAL
@@ -265,10 +267,10 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Allows to define one or more link relations for affordances that point to collections in cases where the resource
-	 * that has the affordance is not the subject in a subject-predicate-object statement about each collection item. E.g.
-	 * a product might have a loose relationship to ordered items where it can be POSTed, but the ordered items do not
-	 * belong to the product, but to an order. You can express that by saying:
+	 * Allows to define one or more link relations for affordances that point to collections in cases where the resource that has the
+	 * affordance is not the subject in a subject-predicate-object statement about each collection item. E.g. a product might have a loose
+	 * relationship to ordered items where it can be POSTed, but the ordered items do not belong to the product, but to an order. You can
+	 * express that by saying:
 	 * 
 	 * <pre>
 	 * TypedResource order = new TypedResource("http://schema.org/Order"); // holds the ordered items
@@ -357,13 +359,11 @@ public class AffordanceBuilder implements LinkBuilder {
 				.expand(Collections.<String, Object> emptyMap());
 		final PartialUriTemplateComponents affordanceComponents = partialUriTemplateComponents;
 
-		final String path = !affordanceComponents.getBaseUri().endsWith("/")
-				&& !urlPartComponents.getBaseUri().startsWith("/")
-						? affordanceComponents.getBaseUri() + "/" + urlPartComponents.getBaseUri()
-						: affordanceComponents.getBaseUri() + urlPartComponents.getBaseUri();
+		final String path = !affordanceComponents.getBaseUri().endsWith("/") && !urlPartComponents.getBaseUri().startsWith("/")
+				? affordanceComponents.getBaseUri() + "/" + urlPartComponents.getBaseUri()
+				: affordanceComponents.getBaseUri() + urlPartComponents.getBaseUri();
 		final String queryHead = affordanceComponents.getQueryHead()
-				+ (StringUtils.hasText(urlPartComponents.getQueryHead()) ? "&" + urlPartComponents.getQueryHead().substring(1)
-						: "");
+				+ (StringUtils.hasText(urlPartComponents.getQueryHead()) ? "&" + urlPartComponents.getQueryHead().substring(1) : "");
 		final String queryTail = affordanceComponents.getQueryTail()
 				+ (StringUtils.hasText(urlPartComponents.getQueryTail()) ? "," + urlPartComponents.getQueryTail() : "");
 		final String fragmentIdentifier = StringUtils.hasText(urlPartComponents.getFragmentIdentifier())
@@ -372,8 +372,8 @@ public class AffordanceBuilder implements LinkBuilder {
 		List<String> variableNames = new ArrayList<String>();
 		variableNames.addAll(affordanceComponents.getVariableNames());
 		variableNames.addAll(urlPartComponents.getVariableNames());
-		final PartialUriTemplateComponents mergedUriComponents = new PartialUriTemplateComponents(path, queryHead,
-				queryTail, fragmentIdentifier, variableNames);
+		final PartialUriTemplateComponents mergedUriComponents = new PartialUriTemplateComponents(path, queryHead, queryTail,
+				fragmentIdentifier, variableNames);
 
 		return new AffordanceBuilder(mergedUriComponents, actionDescriptors);
 	}
@@ -415,9 +415,8 @@ public class AffordanceBuilder implements LinkBuilder {
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
-	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
-	 * {@code X-Forwarded-Ssl} header
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the request contains
+	 * an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header
 	 *
 	 * @return builder
 	 */
@@ -447,7 +446,8 @@ public class AffordanceBuilder implements LinkBuilder {
 
 			builder.host(hostAndPort[0]);
 			builder.port(Integer.parseInt(hostAndPort[1]));
-		} else {
+		}
+		else {
 			builder.host(hostToUse);
 			builder.port(-1); // reset port if it was forwarded from default port
 		}
@@ -479,7 +479,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	/**
 	 * Adds actionDescriptors of the given AffordanceBuilder to this affordanceBuilder.
 	 *
-	 * @param affordanceBuilder whose action descriptors should be added to this one
+	 * @param affordanceBuilders whose action descriptors should be added to this one
 	 * @return builder
 	 */
 	public AffordanceBuilder and(final AffordanceBuilder... affordanceBuilders) {

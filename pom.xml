@@ -4,6 +4,9 @@
 	<groupId>com.github.hateoas-forms</groupId>
 	<artifactId>spring-hateoas-forms</artifactId>
 	<version>0.1.0</version>
+	<name>spring-hateoas-forms</name>
+	<description>An extension of spring-hateoas library to support forms in different formats</description>
+	<url>https://github.com/hateoas-forms/spring-hateoas-forms</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -156,17 +159,9 @@
 	</licenses>
 
 	<distributionManagement>
-		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>oss-staging</id>
-			<name>OSS Staging repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<snapshotRepository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>oss-snapshot</id>
-			<name>OSS Snapshot repository</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -177,18 +172,69 @@
 	</scm>
 
 	<profiles>
+		<!-- Profile to activate artifact signing in release -->
 		<profile>
-			<id>deploySnapshot</id>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>nexus</id>
-					<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
-				</snapshotRepository>
-				<repository>
-					<id>nexus</id>
-					<url>http://localhost:8081/nexus/content/repositories/releases</url>
-				</repository>
-			</distributionManagement>
+			<id>performRelease</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.7</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

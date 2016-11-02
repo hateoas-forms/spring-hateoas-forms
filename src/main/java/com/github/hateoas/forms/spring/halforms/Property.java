@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link Template} may contain a list of
  * {@link Property}
  * 
- * @see http://mamund.site44.com/misc/hal-forms/
+ * @see <a href="http://mamund.site44.com/misc/hal-forms/">http://mamund.site44.com/misc/hal-forms/</a>
  */
 @JsonInclude(Include.NON_DEFAULT)
 public class Property {

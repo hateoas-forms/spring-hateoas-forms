@@ -19,6 +19,7 @@ public class SirenEmbeddedLink extends SirenSubEntity {
 	 * strings. Required.
 	 * @param href The URI of the linked sub-entity. Required.
 	 * @param type Defines media type of the linked sub-entity, per Web Linking (RFC5899). Optional.
+	 * @param title Link title.
 	 */
 	public SirenEmbeddedLink(List<String> sirenClasses, List<String> rels, String href, String type, String title) {
 		super(rels, title, sirenClasses);

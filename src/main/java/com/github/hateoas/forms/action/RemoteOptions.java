@@ -7,7 +7,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.util.Assert;
 
-import com.github.hateoas.forms.action.Options;
 import com.github.hateoas.forms.affordance.Suggest;
 import com.github.hateoas.forms.affordance.SuggestImpl;
 import com.github.hateoas.forms.spring.AffordanceBuilder;
@@ -20,19 +19,19 @@ public class RemoteOptions implements Options<String> {
 
 	private final String textField;
 
+	//@formatter:off 
 	/**
-	 * @formatter:off
 	 * Usage:
 	 * 	public static class SearchableOptions extends RemoteOptions {
      *		public SearchableOptions() {
 			super(AffordanceBuilder.methodOn(DummyController.class).searchMethod(....), "id", "name");
 	 *	   }
 	 *	}
-     * @formatter:on		
 	 * @param lastInvocation
 	 * @param idField
 	 * @param textField
 	 */
+	//@formatter:on
 	public RemoteOptions(final Object lastInvocation, final String idField, final String textField) {
 		Assert.isInstanceOf(DummyInvocationUtils.LastInvocationAware.class, lastInvocation);
 		this.lastInvocation = lastInvocation;

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * Value object for a HAL-FORMS template. Describes the available state transition details.
  * 
- * @see http://mamund.site44.com/misc/hal-forms/
+ * @see <a href="http://mamund.site44.com/misc/hal-forms/">http://mamund.site44.com/misc/hal-forms/</a>
  */
 @JsonInclude(Include.NON_DEFAULT)
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
@@ -50,15 +50,15 @@ public class Template {
 		this(Template.DEFAULT_KEY);
 	}
 
-	public Template(String key) {
+	public Template(final String key) {
 		this.key = key != null ? key : Template.DEFAULT_KEY;
 	}
 
-	public void setMethod(String method) {
+	public void setMethod(final String method) {
 		this.method = method;
 	}
 
-	public void setContentType(String contentType) {
+	public void setContentType(final String contentType) {
 		this.contentType = contentType;
 	}
 
@@ -70,7 +70,7 @@ public class Template {
 		return title;
 	}
 
-	public Property getProperty(String propertyName) {
+	public Property getProperty(final String propertyName) {
 		for (Property property : properties) {
 			if (property.getName().equals(propertyName)) {
 				return property;

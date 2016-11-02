@@ -28,11 +28,10 @@ import com.github.hateoas.forms.affordance.SuggestType;
 public @interface Select {
 
 	/**
-	 * Allows to pass String arguments to the Options implementation. By default, a String array can be used to define
-	 * possible values, since the default Options implementation is {@link StringOptions}
+	 * Allows to pass String arguments to the Options implementation. By default, a String array can be used to define possible values,
+	 * since the default Options implementation is {@link StringOptions}
 	 *
-	 * @return arguments to the Options implementation. For the default {@link StringOptions}, an array of possible
-	 *         values.
+	 * @return arguments to the Options implementation. For the default {@link StringOptions}, an array of possible values.
 	 */
 	String[] value() default {};
 
@@ -51,24 +50,24 @@ public @interface Select {
 	String[] args() default {};
 
 	/**
-	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example
-	 * as a variable in HAL response rather than in HAL-FORMS document
+	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example as a variable in
+	 * HAL response rather than in HAL-FORMS document
 	 * 
-	 * @return
+	 * @return the {@link SuggestType}
 	 */
 	SuggestType type() default SuggestType.INTERNAL;
 
 	/**
 	 * Establish the property as required
 	 * 
-	 * @return
+	 * @return true if property is required
 	 */
 	boolean required() default false;
 
 	/**
 	 * Entire parameter is not editable, refers both to single values and to all properties of a bean parameter.
 	 *
-	 * @return
+	 * @return true if property is editable
 	 */
 	boolean editable() default true;
 

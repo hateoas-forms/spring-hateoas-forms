@@ -14,7 +14,7 @@ public @interface DTOParam {
 	/**
 	 * Set the behavior of the object as wildcard. Its properties will be checked as editable values.
 	 * 
-	 * @return
+	 * @return true if it is a wildcard
 	 */
 	boolean wildcard() default false;
 }

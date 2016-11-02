@@ -27,14 +27,14 @@ public interface ActionDescriptor {
 	/**
 	 * Gets contentType consumed by the action
 	 * 
-	 * @return
+	 * @return consumes
 	 */
 	String getConsumes();
 
 	/**
 	 * Gets contentType produced by the action
 	 * 
-	 * @return
+	 * @return produces
 	 */
 	String getProduces();
 
@@ -62,7 +62,7 @@ public interface ActionDescriptor {
 	/**
 	 * Gets action parameter by name.
 	 *
-	 * @param name
+	 * @param name parameter name
 	 * @return parameter
 	 */
 	ActionInputParameter getActionInputParameter(String name);
@@ -98,14 +98,14 @@ public interface ActionDescriptor {
 	/**
 	 * Hints if the action response is a single object or a collection.
 	 *
-	 * @return cardinality
+	 * @return cardinality cardinality
 	 */
 	Cardinality getCardinality();
 
 	/**
 	 * Visits the body to find parameters
 	 * 
-	 * @param visitor
+	 * @param visitor visitor
 	 */
 	void accept(ActionInputParameterVisitor visitor);
 }

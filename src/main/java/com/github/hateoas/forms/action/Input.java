@@ -57,7 +57,7 @@ public @interface Input {
 	/**
 	 * Entire parameter is not editable, refers both to single values and to all properties of a bean parameter.
 	 *
-	 * @return
+	 * @return true if the parameter is editable
 	 */
 	boolean editable() default true;
 

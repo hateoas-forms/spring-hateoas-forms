@@ -6,19 +6,27 @@ import java.util.Map;
 import com.github.hateoas.forms.action.Type;
 
 /**
- * Interface to represent an input parameter to a resource handler method, independent of a particular ReST framework.
- * Created by Dietrich on 05.04.2015.
+ * Interface to represent an input parameter to a resource handler method, independent of a particular ReST framework. Created by Dietrich
+ * on 05.04.2015.
  */
 public interface ActionInputParameter {
 
 	String MIN = "min";
+
 	String MAX = "max";
+
 	String STEP = "step";
+
 	String MIN_LENGTH = "minLength";
+
 	String MAX_LENGTH = "maxLength";
+
 	String PATTERN = "pattern";
+
 	String READONLY = "readonly";
+
 	String EDITABLE = "editable";
+
 	String REQUIRED = "required";
 
 	/**
@@ -44,8 +52,10 @@ public interface ActionInputParameter {
 
 	/**
 	 * Set the type of parameter when used in html-like contexts (e.g. Siren, Uber, XHtml)
+	 * 
+	 * @param type the {@link Type} to set
 	 *
-	 * @return type
+	 * @return type the {@link Type}
 	 */
 	void setHtmlInputFieldType(Type type);
 
@@ -129,8 +139,8 @@ public interface ActionInputParameter {
 	boolean isArrayOrCollection();
 
 	/**
-	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and
-	 * the kind of input parameter.
+	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and the kind of input
+	 * parameter.
 	 *
 	 * @return true if required
 	 */
@@ -168,8 +178,8 @@ public interface ActionInputParameter {
 	/**
 	 * Gets input constraints.
 	 *
-	 * @return constraints where the key is one of {@link ActionInputParameter#MAX} etc. and the value is a string or
-	 *         number, depending on the input constraint.
+	 * @return constraints where the key is one of {@link ActionInputParameter#MAX} etc. and the value is a string or number, depending on
+	 * the input constraint.
 	 * @see ActionInputParameter#MAX
 	 * @see ActionInputParameter#MIN
 	 * @see ActionInputParameter#MAX_LENGTH
