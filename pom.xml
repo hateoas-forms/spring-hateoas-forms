@@ -175,4 +175,20 @@
 		<developerConnection>scm:git:git://github.com/hateoas-forms/spring-hateoas-forms.git</developerConnection>
 		<url>git@github.com:hateoas-forms/spring-hateoas-forms.git</url>
 	</scm>
+
+	<profiles>
+		<profile>
+			<id>deploySnapshot</id>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>nexus</id>
+					<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>nexus</id>
+					<url>http://localhost:8081/nexus/content/repositories/releases</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 </project>
