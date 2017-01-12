@@ -22,9 +22,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.hateoas.forms.affordance.PartialUriTemplate;
-import com.github.hateoas.forms.affordance.PartialUriTemplateComponents;
-
 public class PartialUriTemplateTest {
 
 	@Test
@@ -38,7 +35,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandAllComponents() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events{/city}{?eventName," + "location}{#section}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -51,7 +48,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandQueryWithTwoVariables() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events/Wiesbaden{?eventName," + "location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -63,7 +60,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandQueryWithOneVariable() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events/Wiesbaden{?eventName}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -75,7 +72,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandLevelOnePathSegment() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events/{city}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example.com/events/Wiesbaden", expanded.toString());
@@ -84,7 +81,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandLevelOnePathSegmentWithRegex() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events/{city:+}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example.com/events/Wiesbaden", expanded.toString());
@@ -93,7 +90,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandLevelOnePathSegmentWithPrefix() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events/v{version}/Wiesbaden");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("version", "1.2.0");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example.com/events/v1.2.0/Wiesbaden", expanded.toString());
@@ -102,7 +99,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandLevelOneQueryWithOneVariable() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example" + ".com/events/Wiesbaden?eventName={eventName}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -115,7 +112,7 @@ public class PartialUriTemplateTest {
 	public void testExpandLevelOneQueryWithTwoVariables() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events/Wiesbaden?eventName={eventName}&location={location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -128,7 +125,7 @@ public class PartialUriTemplateTest {
 	public void testExpandDoesNotChangeUrlWithoutVariables() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#description");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -142,7 +139,7 @@ public class PartialUriTemplateTest {
 	public void testExpandWithFixedQuery() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events{/city}?eventName=Revo+Tour&location=Schlachthof{#section}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -155,7 +152,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandWithFixedFragmentIdentifier() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events{/city}{?eventName," + "location}#price");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -167,7 +164,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandAllComponentsButFragmentIdentifier() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example.com/events{/city}{?eventName," + "location}{#section}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("eventName", "Revo Tour");
 		val.put("location", "Schlachthof");
@@ -178,7 +175,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandOneOfTwoQueryVariables() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example" + ".com/events{/city}/concerts{?eventName,location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("location", "Schlachthof");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example.com/events{/city}/concerts?location=Schlachthof{&eventName}", expanded.toString());
@@ -187,7 +184,7 @@ public class PartialUriTemplateTest {
 	@Test
 	public void testExpandSegmentVariable() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate("http://example" + ".com/events/{city}/concerts{?eventName,location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("city", "Wiesbaden");
 		val.put("location", "Schlachthof");
 		final PartialUriTemplateComponents expanded = template.expand(val);
@@ -198,7 +195,7 @@ public class PartialUriTemplateTest {
 	public void testExpandQueryContinuationTemplate() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events{/city}/concerts?eventName=Revo+Tour{&location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("location", "Schlachthof");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example.com/events{/city}/concerts?eventName=Revo+Tour&location=Schlachthof", expanded.toString());
@@ -208,7 +205,7 @@ public class PartialUriTemplateTest {
 	public void testExpandQueryContinuationTemplateAfterFixedQueryContinuation() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events{/city}/concerts?eventName=Revo+Tour&foo=bar{&location}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("location", "Schlachthof");
 		final PartialUriTemplateComponents expanded = template.expand(val);
 		Assert.assertEquals("http://example" + ".com/events{/city}/concerts?eventName=Revo+Tour&foo=bar&location=Schlachthof",
@@ -219,7 +216,7 @@ public class PartialUriTemplateTest {
 	public void testExpandQueryContinuationTemplatesAfterFixedQueryContinuation() throws Exception {
 		final PartialUriTemplate template = new PartialUriTemplate(
 				"http://example" + ".com/events{/city}/concerts?eventName=Revo+Tour&foo=bar{&location,baz}");
-		Map<String, Object> val = new HashMap<>();
+		Map<String, Object> val = new HashMap<String, Object>();
 		val.put("baz", "Gnarf");
 		val.put("location", "Schlachthof");
 		final PartialUriTemplateComponents expanded = template.expand(val);

@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
 import com.github.hateoas.forms.spring.sample.test.Event;
-import com.github.hateoas.forms.spring.xhtml.XhtmlResourceMessageConverter;
 
 public class XhtmlResourceMessageConverterReadTest {
 
@@ -14,7 +13,7 @@ public class XhtmlResourceMessageConverterReadTest {
 
 	@Test
 	public void testRecursivelyCreateObjectNestedBean() throws Exception {
-		LinkedMultiValueMap<String, String> formValues = new LinkedMultiValueMap<>();
+		LinkedMultiValueMap<String, String> formValues = new LinkedMultiValueMap<String, String>();
 		formValues.add("workPerformed.name", "foo");
 		formValues.add("location", "Harmonie Heilbronn");
 		Event event = (Event) converter.recursivelyCreateObject(Event.class, formValues, "");

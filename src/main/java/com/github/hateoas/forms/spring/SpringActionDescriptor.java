@@ -85,15 +85,15 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private String semanticActionType;
 
-	private final Map<String, ActionInputParameter> requestParams = new LinkedHashMap<>();
+	private final Map<String, ActionInputParameter> requestParams = new LinkedHashMap<String, ActionInputParameter>();
 
-	private final Map<String, ActionInputParameter> pathVariables = new LinkedHashMap<>();
+	private final Map<String, ActionInputParameter> pathVariables = new LinkedHashMap<String, ActionInputParameter>();
 
-	private final Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<>();
+	private final Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<String, ActionInputParameter>();
 
 	private ActionInputParameter requestBody;
 
-	private final Map<String, ActionInputParameter> bodyInputParameters = new LinkedHashMap<>();
+	private final Map<String, ActionInputParameter> bodyInputParameters = new LinkedHashMap<String, ActionInputParameter>();
 
 	private Cardinality cardinality = Cardinality.SINGLE;
 
@@ -294,7 +294,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	public void setRequestBody(final ActionInputParameter requestBody) {
 		this.requestBody = requestBody;
 		if (requestBody != null) {
-			List<ActionInputParameter> bodyInputParameters = new ArrayList<>();
+			List<ActionInputParameter> bodyInputParameters = new ArrayList<ActionInputParameter>();
 			recurseBeanCreationParams(getRequestBody().getParameterType(), (SpringActionInputParameter) getRequestBody(),
 					getRequestBody().getValue(), "", Collections.<String> emptySet(), new ActionInputParameterVisitor() {
 
@@ -335,7 +335,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 */
 	@Override
 	public Map<String, ActionInputParameter> getRequiredParameters() {
-		Map<String, ActionInputParameter> ret = new HashMap<>();
+		Map<String, ActionInputParameter> ret = new HashMap<String, ActionInputParameter>();
 		for (Map.Entry<String, ActionInputParameter> entry : requestParams.entrySet()) {
 			ActionInputParameter annotatedParameter = entry.getValue();
 			if (annotatedParameter.isRequired()) {
@@ -416,7 +416,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			Assert.notNull(constructor, "no default constructor or JsonCreator found for type " + beanType.getName());
 			int parameterCount = constructor.getParameterTypes().length;
 
-			Set<String> knownConstructorFields = new HashSet<>();
+			Set<String> knownConstructorFields = new HashSet<String>();
 			if (parameterCount > 0) {
 				Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
 

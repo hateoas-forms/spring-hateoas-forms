@@ -17,8 +17,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.hateoas.forms.affordance.Affordance;
-
 public class AffordanceTest {
 
 	@Test
@@ -69,7 +67,7 @@ public class AffordanceTest {
 	public void testExpandWithArgumentsMap() {
 		final Affordance affordance = new Affordance("http://localhost/things{?id}", "thing");
 
-		Map<String, Object> arguments = new HashMap<>();
+		Map<String, Object> arguments = new HashMap<String, Object>();
 		arguments.put("id", 101);
 
 		Assert.assertEquals("http://localhost/things?id=101", affordance.expand(101).getHref());

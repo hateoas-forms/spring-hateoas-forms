@@ -53,13 +53,13 @@ public class AffordanceBuilder implements LinkBuilder {
 
 	private final PartialUriTemplateComponents partialUriTemplateComponents;
 
-	private final List<ActionDescriptor> actionDescriptors = new ArrayList<>();
+	private final List<ActionDescriptor> actionDescriptors = new ArrayList<ActionDescriptor>();
 
-	private final MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<String, String>();
 
-	private final List<String> rels = new ArrayList<>();
+	private final List<String> rels = new ArrayList<String>();
 
-	private final List<String> reverseRels = new ArrayList<>();
+	private final List<String> reverseRels = new ArrayList<String>();
 
 	private TypedResource collectionHolder;
 
@@ -373,7 +373,7 @@ public class AffordanceBuilder implements LinkBuilder {
 		final String fragmentIdentifier = StringUtils.hasText(urlPartComponents.getFragmentIdentifier())
 				? urlPartComponents.getFragmentIdentifier() : affordanceComponents.getFragmentIdentifier();
 
-		List<String> variableNames = new ArrayList<>();
+		List<String> variableNames = new ArrayList<String>();
 		variableNames.addAll(affordanceComponents.getVariableNames());
 		variableNames.addAll(urlPartComponents.getVariableNames());
 		final PartialUriTemplateComponents mergedUriComponents = new PartialUriTemplateComponents(path, queryHead, queryTail,

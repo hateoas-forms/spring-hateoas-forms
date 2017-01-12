@@ -72,9 +72,6 @@ import com.github.hateoas.forms.affordance.Suggest;
 import com.github.hateoas.forms.affordance.SuggestImpl;
 import com.github.hateoas.forms.affordance.SuggestType;
 import com.github.hateoas.forms.spring.AffordanceBuilder;
-import com.github.hateoas.forms.spring.halforms.HalFormsDocument;
-import com.github.hateoas.forms.spring.halforms.HalFormsUtils;
-import com.github.hateoas.forms.spring.halforms.Jackson2HalFormsModule;
 import com.github.hateoas.forms.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -211,7 +208,7 @@ public class HalFormsMessageConverterTest {
 
 		private final String status = "pending";
 
-		private final Resource<Customer> customer = new Resource<>(new Customer());
+		private final Resource<Customer> customer = new Resource<Customer>(new Customer());
 
 		public Order() {
 			customer.add(linkTo(methodOn(DummyCustomersController.class).getCustomer("pj123")).withSelfRel());

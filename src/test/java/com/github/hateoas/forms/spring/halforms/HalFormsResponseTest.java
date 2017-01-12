@@ -42,8 +42,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.github.hateoas.forms.spring.halforms.HalFormsUtils;
-import com.github.hateoas.forms.spring.halforms.Jackson2HalFormsModule;
 import com.github.hateoas.forms.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import com.github.hateoas.forms.spring.halforms.beans.DummyController;
 import com.github.hateoas.forms.spring.halforms.beans.Item;
@@ -70,9 +68,9 @@ public class HalFormsResponseTest {
 		REMOTE, DIRECT, EMBEDDED;
 	}
 
-	private final Map<Integer, SuggestType> suggestProperties = new HashMap<>();
+	private final Map<Integer, SuggestType> suggestProperties = new HashMap<Integer, SuggestType>();
 
-	private final Map<Integer, List<Map<String, Object>>> suggestsValuesList = new HashMap<>();
+	private final Map<Integer, List<Map<String, Object>>> suggestsValuesList = new HashMap<Integer, List<Map<String, Object>>>();
 
 	@Configuration
 	@EnableWebMvc
@@ -132,23 +130,23 @@ public class HalFormsResponseTest {
 		suggestProperties.put(49, SuggestType.DIRECT);
 		suggestProperties.put(50, SuggestType.DIRECT);
 
-		List<Map<String, Object>> valuesList = new ArrayList<>();
-		Map<String, Object> suggestValue = new HashMap<>();
+		List<Map<String, Object>> valuesList = new ArrayList<Map<String, Object>>();
+		Map<String, Object> suggestValue = new HashMap<String, Object>();
 		suggestValue.put("id", 1);
 		suggestValue.put("name", "S1");
 		valuesList.add(suggestValue);
 
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("id", 2);
 		suggestValue.put("name", "S2");
 		valuesList.add(suggestValue);
 
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("id", 3);
 		suggestValue.put("name", "S3");
 		valuesList.add(suggestValue);
 
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("id", 4);
 		suggestValue.put("name", "S4");
 		valuesList.add(suggestValue);
@@ -158,16 +156,16 @@ public class HalFormsResponseTest {
 		suggestsValuesList.put(10, valuesList);
 		suggestsValuesList.put(14, valuesList);
 
-		valuesList = new ArrayList<>();
-		suggestValue = new HashMap<>();
+		valuesList = new ArrayList<Map<String, Object>>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "ONE");
 		suggestValue.put("prompt", "ONE");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "TWO");
 		suggestValue.put("prompt", "TWO");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "THREE");
 		suggestValue.put("prompt", "THREE");
 		valuesList.add(suggestValue);
@@ -175,16 +173,16 @@ public class HalFormsResponseTest {
 		suggestsValuesList.put(11, valuesList);
 		suggestsValuesList.put(15, valuesList);
 
-		valuesList = new ArrayList<>();
-		suggestValue = new HashMap<>();
+		valuesList = new ArrayList<Map<String, Object>>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "FOUR");
 		suggestValue.put("prompt", "FOUR");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "FIVE");
 		suggestValue.put("prompt", "FIVE");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "SIX");
 		suggestValue.put("prompt", "SIX");
 		valuesList.add(suggestValue);
@@ -203,39 +201,39 @@ public class HalFormsResponseTest {
 		suggestsValuesList.put(49, valuesList);
 		suggestsValuesList.put(50, valuesList);
 
-		valuesList = new ArrayList<>();
-		suggestValue = new HashMap<>();
+		valuesList = new ArrayList<Map<String, Object>>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "true");
 		suggestValue.put("prompt", "true");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "false");
 		suggestValue.put("prompt", "false");
 		valuesList.add(suggestValue);
 		suggestsValuesList.put(25, valuesList);
 
-		valuesList = new ArrayList<>();
-		suggestValue = new HashMap<>();
+		valuesList = new ArrayList<Map<String, Object>>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "0");
 		suggestValue.put("prompt", "0");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "1");
 		suggestValue.put("prompt", "1");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "2");
 		suggestValue.put("prompt", "2");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "3");
 		suggestValue.put("prompt", "3");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "4");
 		suggestValue.put("prompt", "4");
 		valuesList.add(suggestValue);
-		suggestValue = new HashMap<>();
+		suggestValue = new HashMap<String, Object>();
 		suggestValue.put("value", "5");
 		suggestValue.put("prompt", "5");
 		valuesList.add(suggestValue);

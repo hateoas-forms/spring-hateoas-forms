@@ -106,9 +106,9 @@ public class DummyController {
 
 	public static final List<Integer> ARRAY_READONLY = Arrays.asList(3);
 
-	public List<Item> items = new ArrayList<>();
+	public List<Item> items = new ArrayList<Item>();
 
-	private final List<ItemResource> resources = new ArrayList<>();
+	private final List<ItemResource> resources = new ArrayList<ItemResource>();
 
 	public static final String MODIFY = "modify";
 
@@ -121,9 +121,9 @@ public class DummyController {
 					ItemType.values()[(i + 2) % ItemType.values().length]);
 			SubEntity entity = new SubEntity(i, "E" + i, Arrays.asList(SubItem.VALIDS_SELECTED[(i + 1) % SubItem.VALIDS_SELECTED.length]),
 					ItemType.values()[(i + 1) % ItemType.values().length], subEntity);
-			List<ListableSubEntity> listSubEntity = new ArrayList<>();
-			List<ListableSubEntity> listWCEntity = new ArrayList<>();
-			List<WildCardedListableSubEntity> listDoubleLevelWCEntity = new ArrayList<>();
+			List<ListableSubEntity> listSubEntity = new ArrayList<ListableSubEntity>();
+			List<ListableSubEntity> listWCEntity = new ArrayList<ListableSubEntity>();
+			List<WildCardedListableSubEntity> listDoubleLevelWCEntity = new ArrayList<WildCardedListableSubEntity>();
 			ArrayList<SubItem> listSubEntitySubItem;
 			for (int j = 0; j < 2; j++) {
 
@@ -135,7 +135,7 @@ public class DummyController {
 						Arrays.asList(ListableItemType.values()[i % ListableItemType.values().length],
 								ListableItemType.values()[(i + 1) % ListableItemType.values().length])));
 
-				listSubEntitySubItem = new ArrayList<>();
+				listSubEntitySubItem = new ArrayList<SubItem>();
 
 				for (int x = 0; x < i + 2; x++) {
 					listSubEntitySubItem.add(new SubItem(i * 10, String.valueOf(i * 10).concat("_name")));
@@ -237,7 +237,7 @@ public class DummyController {
 	}
 
 	public static List<Integer> getIntegerList(final int value) {
-		List<Integer> values = new ArrayList<>();
+		List<Integer> values = new ArrayList<Integer>();
 		for (int i = 0; i < value % 5; i++) {
 			values.add(i);
 		}
@@ -257,13 +257,13 @@ public class DummyController {
 
 		Resource<Item> resource = new ItemResource(item);
 		resource.add(linkTo(methodOn(DummyController.class).get(item.getId())).withSelfRel());
-		return new ResponseEntity<>(resource, HttpStatus.ACCEPTED);
+		return new ResponseEntity<Resource<Item>>(resource, HttpStatus.ACCEPTED);
 	}
 
 	@RequestMapping(value = "/item/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Object> delete(@PathVariable("id") final Integer id) {
 		items.remove(findById(id));
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
 	}
 
 	@RequestMapping(value = "/item", method = RequestMethod.POST)
@@ -271,7 +271,7 @@ public class DummyController {
 		items.add(item);
 		Resource<Item> resource = new ItemResource(item);
 		resource.add(linkTo(methodOn(DummyController.class).get(item.getId())).withSelfRel());
-		return new ResponseEntity<>(resource, HttpStatus.CREATED);
+		return new ResponseEntity<Resource<Item>>(resource, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/item/{id}", method = RequestMethod.GET)
@@ -286,7 +286,7 @@ public class DummyController {
 
 	@RequestMapping(value = "/item/", method = RequestMethod.GET)
 	public Resources<ItemResource> get() {
-		return new Resources<>(resources, linkTo(methodOn(DummyController.class).get()).withSelfRel(),
+		return new Resources<ItemResource>(resources, linkTo(methodOn(DummyController.class).get()).withSelfRel(),
 				linkTo(methodOn(DummyController.class).getFiltered((Date) null, (Date) null, null)).withRel("list-after-date-transfers"));
 	}
 
@@ -346,37 +346,37 @@ public class DummyController {
 			@RequestParam(value = "dateTo", required = false) @Input(value = Type.DATE) @DateTimeFormat(pattern = "yyyy-MM-dd") final Date dateTo,
 			@RequestParam(value = "status", required = false) final ItemType type) {
 
-		List<ItemResource> resources = new ArrayList<>();
+		List<ItemResource> resources = new ArrayList<ItemResource>();
 		for (Item transfer : items) {
 			if (transfer.getType() == type || type == null) {
 				resources.add(new ItemResource(transfer));
 			}
 		}
 
-		return new Resources<>(resources, linkTo(methodOn(DummyController.class).get()).withSelfRel(),
+		return new Resources<ItemResource>(resources, linkTo(methodOn(DummyController.class).get()).withSelfRel(),
 				linkTo(methodOn(DummyController.class).getFiltered((Date) null, (Date) null, null)).withRel("list-after-date-transfers"));
 	}
 
 	@RequestMapping(value = "/subitem/filter", method = RequestMethod.GET, params = "filter")
 	public Resources<SubItem> search(@RequestParam final String filter) {
-		List<SubItem> subItems = new ArrayList<>();
+		List<SubItem> subItems = new ArrayList<SubItem>();
 		for (SubItem subItem : SubItem.VALIDS) {
 			if (subItem.getName().contains(filter)) {
 				subItems.add(subItem);
 			}
 		}
-		return new Resources<>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
+		return new Resources<SubItem>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
 	}
 
 	@RequestMapping(value = "/subitem/anotherFilter/{filter}/", method = RequestMethod.GET)
 	public Resources<AnotherSubItem> searchAnother(@PathVariable final String filter) {
-		List<AnotherSubItem> subItems = new ArrayList<>();
+		List<AnotherSubItem> subItems = new ArrayList<AnotherSubItem>();
 		for (AnotherSubItem subItem : AnotherSubItem.VALIDS) {
 			if (subItem.getOwner().contains(filter)) {
 				subItems.add(subItem);
 			}
 		}
-		return new Resources<>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
+		return new Resources<AnotherSubItem>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
 	}
 
 	private Item findById(final int id) {

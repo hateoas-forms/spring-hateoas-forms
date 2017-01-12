@@ -23,10 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.github.hateoas.forms.action.Action;
-import com.github.hateoas.forms.action.Input;
-import com.github.hateoas.forms.action.Select;
-import com.github.hateoas.forms.action.Type;
 import com.github.hateoas.forms.spring.AnnotableSpringActionInputParameter;
 import com.github.hateoas.forms.spring.SpringActionDescriptor;
 import com.github.hateoas.forms.spring.SpringActionInputParameter;
@@ -36,7 +32,7 @@ import com.github.hateoas.forms.spring.SpringActionInputParameter;
  */
 public class ActionInputParameterTest {
 
-	private static final Map<String, Boolean> DEFAULT_CONSTRAINTS_MAP = new HashMap<>(2);
+	private static final Map<String, Boolean> DEFAULT_CONSTRAINTS_MAP = new HashMap<String, Boolean>(2);
 	static {
 		DEFAULT_CONSTRAINTS_MAP.put("editable", true);
 		DEFAULT_CONSTRAINTS_MAP.put("required", true);
