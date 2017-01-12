@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.hateoas-forms</groupId>
 	<artifactId>spring-hateoas-forms</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>spring-hateoas-forms</name>
 	<description>An extension of spring-hateoas library to support forms in different formats</description>
 	<url>https://github.com/hateoas-forms/spring-hateoas-forms</url>
