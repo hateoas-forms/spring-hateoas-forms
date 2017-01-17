@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>org.springframework.hateoas</groupId>
 			<artifactId>spring-hateoas</artifactId>
-			<version>0.20.0.RELEASE</version>
+			<version>0.23.0.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -235,6 +235,19 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>deploySnapshot</id>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>nexus</id>
+					<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>nexus</id>
+					<url>http://localhost:8081/nexus/content/repositories/releases</url>
+				</repository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 </project>
