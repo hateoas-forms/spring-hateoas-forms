@@ -30,15 +30,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.github.hateoas.forms.affordance.ActionDescriptor;
+import com.github.hateoas.forms.affordance.Affordance;
 import com.github.hateoas.forms.affordance.PartialUriTemplate;
 
 /**
- * Factory for {@link AffordanceBuilder}s in a Spring MVC rest service. Normally one should use the static methods of
- * AffordanceBuilder to get an AffordanceBuilder. Created by dschulten on 03.10.2014.
+ * Factory for {@link AffordanceBuilder}s in a Spring MVC rest service. Normally one should use the static methods of AffordanceBuilder to
+ * get an AffordanceBuilder. Created by dschulten on 03.10.2014.
  */
 public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<AffordanceBuilder> {
 
 	private static final MappingDiscoverer MAPPING_DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+
+	private static boolean paramsOnBody = false;
+
+	public static void setParamsOnBody(final boolean enable) {
+		paramsOnBody = enable;
+	}
 
 	@Override
 	public AffordanceBuilder linkTo(final Method method, final Object... parameters) {
@@ -54,8 +61,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
-		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(
-				AffordanceBuilder.getBuilder().build().toString() + mapping);
+		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + mapping);
 
 		Map<String, Object> values = new HashMap<String, Object>();
 
@@ -70,6 +76,10 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 
 		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(method, values, parameters);
 
+		if (paramsOnBody && !Affordance.isSafe(actionDescriptor.getHttpMethod())) {
+			partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + pathMapping);
+		}
+
 		return new AffordanceBuilder(partialUriTemplate.expand(values), Collections.singletonList(actionDescriptor));
 	}
 
@@ -79,23 +89,24 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 	}
 
 	public AffordanceBuilder linkTo(final Link path, final RequestMethod method, final Class<?> type) {
-		return linkTo(path, method,
-				type != null ? new CustomizableSpringActionInputParameter(type.getSimpleName(), type) : null);
+		return linkTo(path, method, type != null ? new CustomizableSpringActionInputParameter(type.getSimpleName(), type) : null);
 	}
 
-	private AffordanceBuilder linkTo(final Link path, final RequestMethod method,
-			final CustomizableSpringActionInputParameter parameter) {
+	private AffordanceBuilder linkTo(final Link path, final RequestMethod method, final CustomizableSpringActionInputParameter parameter) {
 		String pathMapping = path.getHref();
 		List<String> params = path.getVariableNames();
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
-		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(
-				AffordanceBuilder.getBuilder().build().toString() + mapping);
+		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + mapping);
 
 		SpringActionDescriptor actionDescriptor = new SpringActionDescriptor(method.name().toLowerCase(), method.name());
 
 		if (parameter != null) {
 			actionDescriptor.setRequestBody(parameter);
+		}
+
+		if (paramsOnBody && !Affordance.isSafe(actionDescriptor.getHttpMethod())) {
+			partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + pathMapping);
 		}
 
 		return new AffordanceBuilder(partialUriTemplate.expand(Collections.emptyMap()),
@@ -135,6 +146,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 			}
 			values.put(names.next(), parameter);
 		}
+
 		return new AffordanceBuilder().slash(partialUriTemplate.expand(values));
 	}
 
@@ -160,8 +172,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
-		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(
-				AffordanceBuilder.getBuilder().build().toString() + mapping);
+		PartialUriTemplate partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + mapping);
 
 		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
@@ -179,7 +190,9 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 
 		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(invocation.getMethod(), values,
 				invocation.getArguments());
-
+		if (paramsOnBody && !Affordance.isSafe(actionDescriptor.getHttpMethod())) {
+			partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + pathMapping);
+		}
 		return new AffordanceBuilder(partialUriTemplate.expand(values), Collections.singletonList(actionDescriptor));
 	}
 

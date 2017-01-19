@@ -72,4 +72,5 @@ public class AffordanceTest {
 
 		Assert.assertEquals("http://localhost/things?id=101", affordance.expand(101).getHref());
 	}
+
 }

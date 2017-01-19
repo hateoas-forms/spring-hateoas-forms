@@ -379,6 +379,17 @@ public class DummyController {
 		return new Resources<AnotherSubItem>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
 	}
 
+	@RequestMapping(value = "/subitem/anotherFilter2/", method = RequestMethod.POST)
+	public Resources<AnotherSubItem> searchAnotherPost(@RequestParam final String filter) {
+		List<AnotherSubItem> subItems = new ArrayList<AnotherSubItem>();
+		for (AnotherSubItem subItem : AnotherSubItem.VALIDS) {
+			if (subItem.getOwner().contains(filter)) {
+				subItems.add(subItem);
+			}
+		}
+		return new Resources<AnotherSubItem>(subItems, linkTo(methodOn(DummyController.class).get()).withSelfRel());
+	}
+
 	private Item findById(final int id) {
 		for (Item item : items) {
 			if (item.getId() == id) {

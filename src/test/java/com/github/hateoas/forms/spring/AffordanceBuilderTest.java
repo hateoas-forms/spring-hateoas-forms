@@ -34,7 +34,6 @@ import com.github.hateoas.forms.affordance.ActionDescriptor;
 import com.github.hateoas.forms.affordance.ActionInputParameter;
 import com.github.hateoas.forms.affordance.Affordance;
 import com.github.hateoas.forms.affordance.Suggest;
-import com.github.hateoas.forms.spring.AffordanceBuilder;
 
 public class AffordanceBuilderTest {
 
@@ -71,6 +70,17 @@ public class AffordanceBuilderTest {
 			return new ResponseEntity(HttpStatus.OK);
 		}
 
+		@RequestMapping(value = "/things/filter", method = RequestMethod.POST)
+		public ResponseEntity searchAnother(@RequestParam final String thing) {
+			return new ResponseEntity(HttpStatus.OK);
+		}
+
+	}
+
+	@Test
+	public void testLinkToPostParam() {
+		System.out.println(
+				AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(DummyController.class).searchAnother(null)).withSelfRel().getHref());
 	}
 
 	@Test
