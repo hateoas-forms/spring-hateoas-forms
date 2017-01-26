@@ -20,6 +20,12 @@ public enum Type {
 	 * Determine input type text or number automatically, depending on the annotated parameter
 	 */
 	FROM_JAVA(null),
+
+	/**
+	 * Special case,
+	 */
+	BOOLEAN("boolean"),
+
 	/**
 	 * input type text
 	 */
@@ -57,7 +63,8 @@ public enum Type {
 	 */
 	MONTH("month"),
 	/**
-	 * Numeric value, normally determined automatically. You can set restrictions on the numbers with {@link Input#max}, {@link Input#min} and {@link Input#step}.
+	 * Numeric value, normally determined automatically. You can set restrictions on the numbers with {@link Input#max}, {@link Input#min}
+	 * and {@link Input#step}.
 	 */
 	NUMBER("number"),
 	/**
@@ -91,23 +98,23 @@ public enum Type {
 	/**
 	 * Input type radio
 	 */
-	RADIO("radio"),
-	SUBMIT("submit");
+	RADIO("radio"), SUBMIT("submit");
 
 	private String value;
 
-	Type(String value) {
+	Type(final String value) {
 		this.value = value;
 	}
 
 	/**
 	 * Returns the correct html input type string value, or null if type should be determined from Java type.
 	 */
+	@Override
 	public String toString() {
 		return value;
 	}
 
-	public static Type fromInputType(String inputType) {
+	public static Type fromInputType(final String inputType) {
 		Type[] values = Type.values();
 		Type ret = null;
 		for (Type type : values) {
