@@ -2,7 +2,7 @@ package com.github.hateoas.forms.action;
 
 import java.io.Serializable;
 
-public interface SecureIdentifiableEntity<ID extends Serializable> extends CommonSecureIdentifiable {
+public interface SecureIdentifiableEntity<ID extends Serializable> extends SecureIdContainer {
 	/**
 	 * Returns the id identifying the object.
 	 * 
