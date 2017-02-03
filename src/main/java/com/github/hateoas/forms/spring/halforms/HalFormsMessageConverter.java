@@ -25,20 +25,27 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	private final ObjectMapper objectMapper;
 
-	public HalFormsMessageConverter(final ObjectMapper objectMapper, final RelProvider relProvider,
-			final CurieProvider curieProvider, final MessageSourceAccessor messageSourceAccessor) {
+	public HalFormsMessageConverter(final ObjectMapper objectMapper, final RelProvider relProvider, final CurieProvider curieProvider,
+			final MessageSourceAccessor messageSourceAccessor) {
 		this.objectMapper = objectMapper;
 
 		objectMapper.registerModule(new Jackson2HalModule());
 		objectMapper.registerModule(new Jackson2HalFormsModule());
-		objectMapper.setHandlerInstantiator(
-				new HalFormsHandlerInstantiator(relProvider, curieProvider, messageSourceAccessor, true));
+		objectMapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(relProvider, curieProvider, messageSourceAccessor, true));
 		setSupportedMediaTypes(Arrays.asList(MediaType.parseMediaType("application/prs.hal-forms+json")));
 	}
 
 	@Override
 	protected boolean supports(final Class<?> clazz) {
 		return true;
+	}
+
+	@Override
+	protected boolean canWrite(final MediaType mediaType) {
+		if (mediaType == null) {
+			return false;
+		}
+		return super.canWrite(mediaType);
 	}
 
 	@Override
@@ -63,7 +70,8 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 
 		try {
 			objectMapper.writeValue(jsonGenerator, entity);
-		} catch (JsonProcessingException ex) {
+		}
+		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}
