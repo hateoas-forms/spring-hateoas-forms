@@ -25,6 +25,8 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	private final ObjectMapper objectMapper;
 
+	public static final String HAL_FORMS_MEDIA_TYPE = "application/prs.hal-forms+json";
+
 	public HalFormsMessageConverter(final ObjectMapper objectMapper, final RelProvider relProvider, final CurieProvider curieProvider,
 			final MessageSourceAccessor messageSourceAccessor) {
 		this.objectMapper = objectMapper;
@@ -32,7 +34,7 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 		objectMapper.registerModule(new Jackson2HalModule());
 		objectMapper.registerModule(new Jackson2HalFormsModule());
 		objectMapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(relProvider, curieProvider, messageSourceAccessor, true));
-		setSupportedMediaTypes(Arrays.asList(MediaType.parseMediaType("application/prs.hal-forms+json")));
+		setSupportedMediaTypes(Arrays.asList(MediaType.parseMediaType(HAL_FORMS_MEDIA_TYPE)));
 	}
 
 	@Override

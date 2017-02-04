@@ -35,6 +35,7 @@ import com.github.hateoas.forms.affordance.ActionInputParameter;
 import com.github.hateoas.forms.affordance.Suggest;
 import com.github.hateoas.forms.affordance.SuggestImpl;
 import com.github.hateoas.forms.spring.AffordanceBuilder;
+import com.github.hateoas.forms.spring.halforms.HalFormsMessageConverter;
 
 @Controller
 @RequestMapping(value = "/test")
@@ -290,7 +291,7 @@ public class DummyController {
 				linkTo(methodOn(DummyController.class).getFiltered((Date) null, (Date) null, null)).withRel("list-after-date-transfers"));
 	}
 
-	@RequestMapping(value = "/item/{id}", method = RequestMethod.GET, params = "rel", produces = "application/prs.hal-forms+json")
+	@RequestMapping(value = "/item/{id}", method = RequestMethod.GET, params = "rel", produces = HalFormsMessageConverter.HAL_FORMS_MEDIA_TYPE)
 	public ResourceSupport get(@PathVariable("id") final Integer id, @RequestParam final String rel) {
 		return getById(id, rel);
 	}
@@ -304,7 +305,7 @@ public class DummyController {
 		}
 	}
 
-	@RequestMapping(value = "/item/", method = RequestMethod.GET, params = "rel", produces = "application/prs.hal-forms+json")
+	@RequestMapping(value = "/item/", method = RequestMethod.GET, params = "rel", produces = HalFormsMessageConverter.HAL_FORMS_MEDIA_TYPE)
 	public ResourceSupport get(@RequestParam final String rel) {
 		ResourceSupport resourceSupport = new ResourceSupport();
 
@@ -330,7 +331,7 @@ public class DummyController {
 		return resourceSupport;
 	}
 
-	@RequestMapping(value = "/item/filter", method = RequestMethod.GET, params = "rel", produces = "application/prs.hal-forms+json")
+	@RequestMapping(value = "/item/filter", method = RequestMethod.GET, params = "rel", produces = HalFormsMessageConverter.HAL_FORMS_MEDIA_TYPE)
 	public ResourceSupport getFiltered(@RequestParam final String rel) {
 		ResourceSupport resourceSupport = new ResourceSupport();
 
