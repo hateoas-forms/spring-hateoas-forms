@@ -140,7 +140,7 @@ public class ActionDescriptorBuilder {
 			} else {
 				argument = null;
 			}
-			SpringActionDescriptor.recurseBeanCreationParams(argument.getClass(), null, argument, "", new HashSet<String>(),
+			SpringActionDescriptor.recurseBeanCreationParams(parameter.getParameterType(), null, argument, "", new HashSet<String>(),
 					new ActionInputParameterVisitor() {
 
 						@Override
