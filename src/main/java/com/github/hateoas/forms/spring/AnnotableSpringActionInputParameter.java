@@ -35,6 +35,8 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 
 	private final MethodParameter methodParameter;
 
+	TypeDescriptor typeDescriptor;
+
 	/**
 	 * Creates action input parameter.
 	 *
@@ -53,15 +55,20 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 		for (Annotation annotation : annotations) {
 			if (RequestBody.class.isInstance(annotation)) {
 				requestBody = (RequestBody) annotation;
-			} else if (RequestParam.class.isInstance(annotation)) {
+			}
+			else if (RequestParam.class.isInstance(annotation)) {
 				requestParam = (RequestParam) annotation;
-			} else if (PathVariable.class.isInstance(annotation)) {
+			}
+			else if (PathVariable.class.isInstance(annotation)) {
 				pathVariable = (PathVariable) annotation;
-			} else if (RequestHeader.class.isInstance(annotation)) {
+			}
+			else if (RequestHeader.class.isInstance(annotation)) {
 				requestHeader = (RequestHeader) annotation;
-			} else if (Input.class.isInstance(annotation)) {
+			}
+			else if (Input.class.isInstance(annotation)) {
 				inputAnnotation = (Input) annotation;
-			} else if (Select.class.isInstance(annotation)) {
+			}
+			else if (Select.class.isInstance(annotation)) {
 				select = (Select) annotation;
 			}
 		}
@@ -91,27 +98,30 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 			hidden = inputAnnotation.hidden();
 			include = inputAnnotation.include();
 			type = ParameterType.INPUT;
-		} else {
+		}
+		else {
 			setReadOnly(select != null ? !select.editable() : !editable);
 			putInputConstraint(ActionInputParameter.REQUIRED, "", requiredByAnnotations);
 		}
 		if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
 			if (isArrayOrCollection() || isRequestBody()) {
 				fieldType = null;
-			} else if (DataType.isNumber(getParameterType())) {
+			}
+			else if (DataType.isNumber(getParameterType())) {
 				fieldType = Type.NUMBER;
-			} else {
+			}
+			else {
 				fieldType = Type.TEXT;
 			}
-		} else {
+		}
+		else {
 			fieldType = inputAnnotation.value();
 		}
 		createResolver(methodParameter, select);
-		typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+
 	}
 
-	public AnnotableSpringActionInputParameter(final MethodParameter methodParameter, final Object value,
-			final String name) {
+	public AnnotableSpringActionInputParameter(final MethodParameter methodParameter, final Object value, final String name) {
 		this(methodParameter, value, DEFAULT_CONVERSION_SERVICE, name);
 	}
 
@@ -139,14 +149,16 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 		if (select != null && (select.options() != StringOptions.class || !isEnumType(parameterType))) {
 			resolver = new OptionsPossibleValuesResolver<Object>(select);
 			this.type = ParameterType.SELECT;
-		} else if (Enum[].class.isAssignableFrom(parameterType)) {
-			resolver = new FixedPossibleValuesResolver(
-					SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants()), type);
+		}
+		else if (Enum[].class.isAssignableFrom(parameterType)) {
+			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants()), type);
 			this.type = ParameterType.SELECT;
-		} else if (Enum.class.isAssignableFrom(parameterType)) {
+		}
+		else if (Enum.class.isAssignableFrom(parameterType)) {
 			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(parameterType.getEnumConstants()), type);
 			this.type = ParameterType.SELECT;
-		} else if (Collection.class.isAssignableFrom(parameterType)) {
+		}
+		else if (Collection.class.isAssignableFrom(parameterType)) {
 			TypeDescriptor descriptor = TypeDescriptor.nested(methodParameter, 1);
 			if (descriptor != null) {
 				nested = descriptor.getType();
@@ -160,8 +172,8 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 	}
 
 	/**
-	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and
-	 * the kind of input parameter.
+	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and the kind of input
+	 * parameter.
 	 *
 	 * @return true if required
 	 */
@@ -169,11 +181,14 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 	public boolean isRequired() {
 		if (isRequestBody()) {
 			return requestBody.required();
-		} else if (isRequestParam()) {
+		}
+		else if (isRequestParam()) {
 			return !(isDefined(requestParam.defaultValue()) || !requestParam.required());
-		} else if (isRequestHeader()) {
+		}
+		else if (isRequestHeader()) {
 			return !(isDefined(requestHeader.defaultValue()) || !requestHeader.required());
-		} else {
+		}
+		else {
 			return true;
 		}
 	}
@@ -187,9 +202,11 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 		String ret;
 		if (isRequestParam()) {
 			ret = isDefined(requestParam.defaultValue()) ? requestParam.defaultValue() : null;
-		} else if (isRequestHeader()) {
+		}
+		else if (isRequestHeader()) {
 			ret = !ValueConstants.DEFAULT_NONE.equals(requestHeader.defaultValue()) ? requestHeader.defaultValue() : null;
-		} else {
+		}
+		else {
 			ret = null;
 		}
 		return ret;
@@ -211,7 +228,8 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 		if (parameterName == null) {
 			methodParameter.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 			ret = methodParameter.getParameterName();
-		} else {
+		}
+		else {
 			ret = parameterName;
 		}
 		return ret;
@@ -254,12 +272,35 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 	}
 
 	public boolean isInputParameter() {
-		return type == ParameterType.INPUT && requestBody == null && pathVariable == null && requestHeader == null
-				&& requestParam == null;
+		return type == ParameterType.INPUT && requestBody == null && pathVariable == null && requestHeader == null && requestParam == null;
 	}
 
 	@Override
 	public String getRequestHeaderName() {
 		return isRequestHeader() ? requestHeader.value() : null;
+	}
+
+	/**
+	 * The value of the parameter at sample invocation time, formatted according to conversion configuration.
+	 *
+	 * @return value, may be null
+	 */
+	@Override
+	public String getValueFormatted() {
+		String ret;
+		if (value == null) {
+			ret = null;
+		}
+		else {
+			ret = (String) conversionService.convert(value, getTypeDescriptor(), TypeDescriptor.valueOf(String.class));
+		}
+		return ret;
+	}
+
+	private TypeDescriptor getTypeDescriptor() {
+		if (typeDescriptor == null) {
+			typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+		}
+		return typeDescriptor;
 	}
 }

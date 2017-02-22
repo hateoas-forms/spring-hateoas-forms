@@ -17,6 +17,7 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -638,7 +639,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private Cardinality getCardinality(final Method invokedMethod, final RequestMethod httpMethod, final Type genericReturnType) {
 		Cardinality cardinality;
 
-		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation(invokedMethod, ResourceHandler.class);
+		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation((AnnotatedElement)invokedMethod, ResourceHandler.class);
 		if (resourceAnn != null) {
 			cardinality = resourceAnn.value();
 		}

@@ -21,15 +21,15 @@ import java.util.Set;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
-import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.github.hateoas.forms.affordance.ActionDescriptor;
+import com.github.hateoas.forms.affordance.ActionInputParameter;
 import com.github.hateoas.forms.affordance.Affordance;
 import com.github.hateoas.forms.affordance.PartialUriTemplate;
 
@@ -39,7 +39,7 @@ import com.github.hateoas.forms.affordance.PartialUriTemplate;
  */
 public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<AffordanceBuilder> {
 
-	private static final MappingDiscoverer MAPPING_DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final MappingDiscoverer MAPPING_DISCOVERER = new CachedMappingDiscoverer();
 
 	private static boolean paramsOnBody = false;
 
@@ -56,8 +56,9 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 	public AffordanceBuilder linkTo(final Class<?> controller, final Method method, final Object... parameters) {
 
 		String pathMapping = MAPPING_DISCOVERER.getMapping(controller, method);
-
-		final Set<String> params = getRequestParamNames(method, parameters);
+		MethodParameters mparameters = new MethodParameters(method);
+		Map<String, ActionInputParameter> requestParams = ActionDescriptorBuilder.getRequestParams(mparameters, parameters);
+		final Set<String> params = requestParams.keySet();
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
@@ -74,7 +75,8 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 			values.put(names.next(), parameter);
 		}
 
-		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(method, values, parameters);
+		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(mparameters, method, values, parameters,
+				requestParams);
 
 		if (paramsOnBody && !Affordance.isSafe(actionDescriptor.getHttpMethod())) {
 			partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + pathMapping);
@@ -164,11 +166,12 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		DummyInvocationUtils.LastInvocationAware invocations = (DummyInvocationUtils.LastInvocationAware) invocationValue;
 
 		DummyInvocationUtils.MethodInvocation invocation = invocations.getLastInvocation();
-		Method invokedMethod = invocation.getMethod();
-
+		final Method invokedMethod = invocation.getMethod();
+		MethodParameters parameters = new MethodParameters(invokedMethod);
 		String pathMapping = MAPPING_DISCOVERER.getMapping(invokedMethod);
 
-		Set<String> params = getRequestParamNames(invokedMethod, invocation.getArguments());
+		Map<String, ActionInputParameter> requestParams = ActionDescriptorBuilder.getRequestParams(parameters, invocation.getArguments());
+		Set<String> params = requestParams.keySet();
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
@@ -188,15 +191,12 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 			}
 		}
 
-		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(invocation.getMethod(), values,
-				invocation.getArguments());
+		ActionDescriptor actionDescriptor = ActionDescriptorBuilder.createActionDescriptor(parameters, invokedMethod, values,
+				invocation.getArguments(), requestParams);
 		if (paramsOnBody && !Affordance.isSafe(actionDescriptor.getHttpMethod())) {
 			partialUriTemplate = new PartialUriTemplate(AffordanceBuilder.getBuilder().build().toString() + pathMapping);
 		}
 		return new AffordanceBuilder(partialUriTemplate.expand(values), Collections.singletonList(actionDescriptor));
 	}
 
-	private Set<String> getRequestParamNames(final Method invokedMethod, final Object[] arguments) {
-		return ActionDescriptorBuilder.getRequestParams(invokedMethod, arguments).keySet();
-	}
 }

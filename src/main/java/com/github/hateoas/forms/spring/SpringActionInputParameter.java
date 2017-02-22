@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -53,9 +52,7 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 
 	private static final List<Suggest<?>> EMPTY_SUGGEST = Collections.emptyList();
 
-	TypeDescriptor typeDescriptor;
-
-	private final Object value;
+	final Object value;
 
 	private Boolean arrayOrCollection = null;
 
@@ -75,19 +72,18 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 
 	ParameterType type = ParameterType.UNKNOWN;
 
-	@SuppressWarnings({ "unchecked", "rawtypes" }) PossibleValuesResolver<?> resolver = new FixedPossibleValuesResolver(
-			EMPTY_SUGGEST, SuggestType.INTERNAL);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	PossibleValuesResolver<?> resolver = new FixedPossibleValuesResolver(EMPTY_SUGGEST, SuggestType.INTERNAL);
 
 	protected static ConversionService DEFAULT_CONVERSION_SERVICE = new DefaultFormattingConversionService();
 
-	private final ConversionService conversionService;
+	final ConversionService conversionService;
 
 	Type fieldType;
 
 	private final String name;
 
-	protected SpringActionInputParameter(final String name, final Object value,
-			final ConversionService conversionService) {
+	protected SpringActionInputParameter(final String name, final Object value, final ConversionService conversionService) {
 		this.name = name;
 		this.conversionService = conversionService;
 		this.value = value;
@@ -120,13 +116,7 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	 */
 	@Override
 	public String getValueFormatted() {
-		String ret;
-		if (value == null) {
-			ret = null;
-		} else {
-			ret = (String) conversionService.convert(value, typeDescriptor, TypeDescriptor.valueOf(String.class));
-		}
-		return ret;
+		return value.toString();
 	}
 
 	/**
@@ -145,8 +135,8 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	}
 
 	/**
-	 * Has constraints defined via <code>@Input</code> annotation. Note that there might also be other kinds of
-	 * constraints, e.g. <code>@Select</code> may define values for {@link #getPossibleValues}.
+	 * Has constraints defined via <code>@Input</code> annotation. Note that there might also be other kinds of constraints, e.g.
+	 * <code>@Select</code> may define values for {@link #getPossibleValues}.
 	 *
 	 * @return true if parameter is constrained
 	 */
@@ -266,8 +256,8 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	}
 
 	/**
-	 * Allows convenient access to multiple call values in case that this input parameter is an array or collection. Make
-	 * sure to check {@link #isArrayOrCollection()} before calling this method.
+	 * Allows convenient access to multiple call values in case that this input parameter is an array or collection. Make sure to check
+	 * {@link #isArrayOrCollection()} before calling this method.
 	 *
 	 * @return call values or empty array
 	 * @throws UnsupportedOperationException if this input parameter is not an array or collection
@@ -281,11 +271,13 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 		Object callValue = getValue();
 		if (callValue == null) {
 			callValues = new Object[0];
-		} else {
+		}
+		else {
 			Class<?> parameterType = getParameterType();
 			if (parameterType.isArray()) {
 				callValues = (Object[]) callValue;
-			} else {
+			}
+			else {
 				callValues = ((Collection<?>) callValue).toArray();
 			}
 		}
@@ -317,17 +309,20 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 		String kind;
 		if (isRequestBody()) {
 			kind = "RequestBody";
-		} else if (isPathVariable()) {
+		}
+		else if (isPathVariable()) {
 			kind = "PathVariable";
-		} else if (isRequestParam()) {
+		}
+		else if (isRequestParam()) {
 			kind = "RequestParam";
-		} else if (isRequestHeader()) {
+		}
+		else if (isRequestHeader()) {
 			kind = "RequestHeader";
-		} else {
+		}
+		else {
 			kind = "nested bean property";
 		}
-		return kind + (getParameterName() != null ? " " + getParameterName() : "") + ": "
-				+ (value != null ? value.toString() : "no value");
+		return kind + (getParameterName() != null ? " " + getParameterName() : "") + ": " + (value != null ? value.toString() : "no value");
 	}
 
 	private static <T extends Options<V>, V> Options<V> getOptions(final Class<? extends Options<V>> beanType) {
@@ -335,7 +330,8 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 		if (options == null) {
 			try {
 				options = beanType.newInstance();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -353,7 +349,9 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 			if (!beans.isEmpty()) {
 				return beans.values().iterator().next();
 			}
-		} catch (Exception e) {}
+		}
+		catch (Exception e) {
+		}
 		return null;
 	}
 
@@ -388,6 +386,7 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	class FixedPossibleValuesResolver<T> implements PossibleValuesResolver<T> {
 
 		private final List<Suggest<T>> values;
+
 		private SuggestType type;
 
 		public FixedPossibleValuesResolver(final List<Suggest<T>> values, final SuggestType type) {

@@ -25,18 +25,16 @@ import com.github.hateoas.forms.affordance.ActionInputParameterVisitor;
 
 public class ActionDescriptorBuilder {
 
-	static ActionDescriptor createActionDescriptor(final Method invokedMethod, final Map<String, Object> values,
-			final Object[] arguments) {
+	static ActionDescriptor createActionDescriptor(final MethodParameters parameters, final Method invokedMethod,
+			final Map<String, Object> values, final Object[] arguments, final Map<String, ActionInputParameter> requestParamMap) {
 
 		SpringActionDescriptor actionDescriptor = new SpringActionDescriptor(invokedMethod);
-
 		final Action actionAnnotation = AnnotationUtils.getAnnotation(invokedMethod, Action.class);
 		if (actionAnnotation != null) {
 			actionDescriptor.setSemanticActionType(actionAnnotation.value());
 		}
 
 		// the action descriptor needs to know the param type, value and name
-		Map<String, ActionInputParameter> requestParamMap = getRequestParams(invokedMethod, arguments);
 		for (Map.Entry<String, ActionInputParameter> entry : requestParamMap.entrySet()) {
 			ActionInputParameter value = entry.getValue();
 			if (value != null) {
@@ -48,8 +46,7 @@ public class ActionDescriptorBuilder {
 			}
 		}
 
-		Map<String, ActionInputParameter> pathVariableMap = getActionInputParameters(PathVariable.class, invokedMethod,
-				arguments);
+		Map<String, ActionInputParameter> pathVariableMap = getActionInputParameters(PathVariable.class, parameters, arguments);
 		for (Map.Entry<String, ActionInputParameter> entry : pathVariableMap.entrySet()) {
 			ActionInputParameter actionInputParameter = entry.getValue();
 			if (actionInputParameter != null) {
@@ -61,8 +58,7 @@ public class ActionDescriptorBuilder {
 			}
 		}
 
-		Map<String, ActionInputParameter> requestHeadersMap = getActionInputParameters(RequestHeader.class, invokedMethod,
-				arguments);
+		Map<String, ActionInputParameter> requestHeadersMap = getActionInputParameters(RequestHeader.class, parameters, arguments);
 
 		for (Map.Entry<String, ActionInputParameter> entry : requestHeadersMap.entrySet()) {
 			ActionInputParameter actionInputParameter = entry.getValue();
@@ -74,9 +70,7 @@ public class ActionDescriptorBuilder {
 				}
 			}
 		}
-
-		Map<String, ActionInputParameter> requestBodyMap = getActionInputParameters(RequestBody.class, invokedMethod,
-				arguments);
+		Map<String, ActionInputParameter> requestBodyMap = getActionInputParameters(RequestBody.class, parameters, arguments);
 		Assert.state(requestBodyMap.size() < 2, "found more than one request body on " + invokedMethod.getName());
 		for (ActionInputParameter value : requestBodyMap.values()) {
 			actionDescriptor.setRequestBody(value);
@@ -93,12 +87,9 @@ public class ActionDescriptorBuilder {
 	 * @param arguments to the method link
 	 * @return maps parameter names to parameter info
 	 */
-	private static Map<String, ActionInputParameter> getActionInputParameters(
-			final Class<? extends Annotation> annotation, final Method method, final Object... arguments) {
+	private static Map<String, ActionInputParameter> getActionInputParameters(final Class<? extends Annotation> annotation,
+			final MethodParameters parameters, final Object... arguments) {
 
-		Assert.notNull(method, "MethodInvocation must not be null!");
-
-		MethodParameters parameters = new MethodParameters(method);
 		Map<String, ActionInputParameter> result = new LinkedHashMap<String, ActionInputParameter>();
 
 		for (MethodParameter parameter : parameters.getParametersWith(annotation)) {
@@ -106,7 +97,8 @@ public class ActionDescriptorBuilder {
 			final Object argument;
 			if (parameterIndex < arguments.length) {
 				argument = arguments[parameterIndex];
-			} else {
+			}
+			else {
 				argument = null;
 			}
 			result.put(parameter.getParameterName(),
@@ -124,12 +116,9 @@ public class ActionDescriptorBuilder {
 	 * @param arguments to the method link
 	 * @return maps parameter names to parameter info
 	 */
-	private static Map<String, ActionInputParameter> getDTOActionInputParameters(final Method method,
+	private static Map<String, ActionInputParameter> getDTOActionInputParameters(final MethodParameters parameters,
 			final Object... arguments) {
 
-		Assert.notNull(method, "MethodInvocation must not be null!");
-
-		MethodParameters parameters = new MethodParameters(method);
 		final Map<String, ActionInputParameter> result = new HashMap<String, ActionInputParameter>();
 
 		for (MethodParameter parameter : parameters.getParametersWith(DTOParam.class)) {
@@ -137,7 +126,8 @@ public class ActionDescriptorBuilder {
 			final Object argument;
 			if (parameterIndex < arguments.length) {
 				argument = arguments[parameterIndex];
-			} else {
+			}
+			else {
 				argument = null;
 			}
 			SpringActionDescriptor.recurseBeanCreationParams(parameter.getParameterType(), null, argument, "", new HashSet<String>(),
@@ -154,11 +144,10 @@ public class ActionDescriptorBuilder {
 		return result;
 	}
 
-	static Map<String, ActionInputParameter> getRequestParams(final Method invokedMethod, final Object[] arguments) {
+	static Map<String, ActionInputParameter> getRequestParams(final MethodParameters parameters, final Object[] arguments) {
 		// the action descriptor needs to know the param type, value and name
-		Map<String, ActionInputParameter> requestParamMap = getActionInputParameters(RequestParam.class, invokedMethod,
-				arguments);
-		requestParamMap.putAll(getDTOActionInputParameters(invokedMethod, arguments));
+		Map<String, ActionInputParameter> requestParamMap = getActionInputParameters(RequestParam.class, parameters, arguments);
+		requestParamMap.putAll(getDTOActionInputParameters(parameters, arguments));
 		return requestParamMap;
 
 	}
