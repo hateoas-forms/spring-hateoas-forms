@@ -19,160 +19,163 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
-
 /**
- * Distinguishes and creates data types, e.g. for serialization/deserialization.
- * Created by dschulten on 22.10.2014.
+ * Distinguishes and creates data types, e.g. for serialization/deserialization. Created by dschulten on 22.10.2014.
  */
 public class DataType {
 
 	/**
-	 * Determines if the given class holds only one data item. Can be useful to determine if a value should be rendered
-	 * as scalar.
+	 * Determines if the given class holds only one data item. Can be useful to determine if a value should be rendered as scalar.
 	 *
 	 * @param clazz to check
 	 * @return true if class is scalar
 	 */
-	public static boolean isSingleValueType(Class<?> clazz) {
+	public static boolean isSingleValueType(final Class<?> clazz) {
 		boolean ret;
-		if (isNumber(clazz)
-				|| isBoolean(clazz)
-				|| isString(clazz)
-				|| isEnum(clazz)
-				|| isDate(clazz)
-				|| isCalendar(clazz)
-				|| isCurrency(clazz)
-				) {
+		if (isNumber(clazz) || isBoolean(clazz) || isString(clazz) || isEnum(clazz) || isDate(clazz) || isCalendar(clazz)
+				|| isCurrency(clazz)) {
 			ret = true;
-		} else {
+		}
+		else {
 			ret = false;
 		}
 		return ret;
 	}
 
-	public static boolean isArrayOrCollection(Class<?> parameterType) {
-		return (parameterType.isArray() || Collection.class.isAssignableFrom(parameterType));
+	public static boolean isArrayOrCollection(final Class<?> parameterType) {
+		return parameterType.isArray() || Collection.class.isAssignableFrom(parameterType);
 	}
 
-	public static boolean isNumber(Class<?> clazz) {
-		return (
-				Number.class.isAssignableFrom(clazz) ||
-						int.class == clazz ||
-						long.class == clazz ||
-						float.class == clazz ||
-						byte.class == clazz ||
-						short.class == clazz ||
-						double.class == clazz
-		);
+	public static boolean isNumber(final Class<?> clazz) {
+		return Number.class.isAssignableFrom(clazz) || int.class == clazz || long.class == clazz || float.class == clazz
+				|| byte.class == clazz || short.class == clazz || double.class == clazz;
 	}
 
-	public static boolean isInteger(Class<?> clazz) {
-		return (Integer.class.isAssignableFrom(clazz) || int.class == clazz);
+	public static boolean isInteger(final Class<?> clazz) {
+		return Integer.class.isAssignableFrom(clazz) || int.class == clazz;
 	}
 
-	public static boolean isLong(Class<?> clazz) {
-		return (Long.class.isAssignableFrom(clazz) || long.class == clazz);
+	public static boolean isLong(final Class<?> clazz) {
+		return Long.class.isAssignableFrom(clazz) || long.class == clazz;
 	}
 
-	public static boolean isFloat(Class<?> clazz) {
-		return (Float.class.isAssignableFrom(clazz) || float.class == clazz);
+	public static boolean isFloat(final Class<?> clazz) {
+		return Float.class.isAssignableFrom(clazz) || float.class == clazz;
 	}
 
-	public static boolean isDouble(Class<?> clazz) {
-		return (Double.class.isAssignableFrom(clazz) || double.class == clazz);
+	public static boolean isDouble(final Class<?> clazz) {
+		return Double.class.isAssignableFrom(clazz) || double.class == clazz;
 	}
 
-	public static boolean isByte(Class<?> clazz) {
-		return (Byte.class.isAssignableFrom(clazz) || byte.class == clazz);
+	public static boolean isByte(final Class<?> clazz) {
+		return Byte.class.isAssignableFrom(clazz) || byte.class == clazz;
 	}
 
-	public static boolean isShort(Class<?> clazz) {
-		return (Short.class.isAssignableFrom(clazz) || short.class == clazz);
+	public static boolean isShort(final Class<?> clazz) {
+		return Short.class.isAssignableFrom(clazz) || short.class == clazz;
 	}
 
-	public static boolean isBoolean(Class<?> clazz) {
-		return (Boolean.class.isAssignableFrom(clazz) || boolean.class == clazz);
+	public static boolean isBoolean(final Class<?> clazz) {
+		return Boolean.class.isAssignableFrom(clazz) || boolean.class == clazz;
 	}
 
-	public static boolean isEnum(Class<?> clazz) {
+	public static boolean isEnum(final Class<?> clazz) {
 		return Enum.class.isAssignableFrom(clazz);
 	}
 
-	public static boolean isString(Class<?> parameterType) {
+	public static boolean isString(final Class<?> parameterType) {
 		return String.class.isAssignableFrom(parameterType);
 	}
 
-	public static boolean isBigInteger(Class<?> clazz) {
+	public static boolean isBigInteger(final Class<?> clazz) {
 		return BigInteger.class.isAssignableFrom(clazz);
 	}
 
-	public static boolean isBigDecimal(Class<?> clazz) {
+	public static boolean isBigDecimal(final Class<?> clazz) {
 		return BigDecimal.class.isAssignableFrom(clazz);
 	}
 
-	public static boolean isDate(Class<?> clazz) {
-		return Date.class.isAssignableFrom(clazz);
+	public static boolean isDate(final Class<?> clazz) {
+		return Date.class.isAssignableFrom(clazz) || clazz.getName().startsWith("java.time.ZonedDateTime");
 	}
 
-	public static boolean isCalendar(Class<?> clazz) {
+	public static boolean isCalendar(final Class<?> clazz) {
 		return Calendar.class.isAssignableFrom(clazz);
 	}
 
-	public static boolean isCurrency(Class<?> clazz) {
+	public static boolean isCurrency(final Class<?> clazz) {
 		return Currency.class.isAssignableFrom(clazz);
 	}
 
-	public static Object asScalarValue(Object bean) {
+	public static Object asScalarValue(final Object bean) {
 		Class<?> type = bean.getClass();
 		if (isBigInteger(type)) {
 			return ((BigInteger) bean).intValue();
-		} else if (isBigDecimal(type)) {
+		}
+		else if (isBigDecimal(type)) {
 			return ((BigDecimal) bean).doubleValue();
-		} else if (isCalendar(type)) {
+		}
+		else if (isCalendar(type)) {
 			return ((Calendar) bean).getTime();
-		} else if (isDate(type)) {
+		}
+		else if (isDate(type)) {
 			return ((Date) bean).getTime();
-		} else if (isCurrency(type)) {
+		}
+		else if (isCurrency(type)) {
 			return ((Currency) bean).toString();
-		} else {
+		}
+		else {
 			return bean;
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Object asType(Class<?> type, String string) {
+	public static Object asType(final Class<?> type, final String string) {
 		if (isBoolean(type)) {
 			return Boolean.parseBoolean(string);
-		} else if (isInteger(type)) {
+		}
+		else if (isInteger(type)) {
 			return Integer.parseInt(string);
-		} else if (isLong(type)) {
+		}
+		else if (isLong(type)) {
 			return Long.parseLong(string);
-		} else if (isDouble(type)) {
+		}
+		else if (isDouble(type)) {
 			return Double.parseDouble(string);
-		} else if (isFloat(type)) {
+		}
+		else if (isFloat(type)) {
 			return Float.parseFloat(string);
-		} else if (isByte(type)) {
+		}
+		else if (isByte(type)) {
 			return Byte.parseByte(string);
-		} else if (isShort(type)) {
+		}
+		else if (isShort(type)) {
 			return Short.parseShort(string);
-		} else if (isBigInteger(type)) {
+		}
+		else if (isBigInteger(type)) {
 			return new BigInteger(string);
-		} else if (isBigDecimal(type)) {
+		}
+		else if (isBigDecimal(type)) {
 			return new BigDecimal(string);
-		} else if (isCalendar(type)) {
+		}
+		else if (isCalendar(type)) {
 			return DatatypeConverter.parseDateTime(string);
-		} else if (isDate(type)) {
+		}
+		else if (isDate(type)) {
 			if (isIsoLatin1Number(string)) {
 				return new Date(Long.parseLong(string));
-			} else {
-				return DatatypeConverter.parseDateTime(string)
-						.getTime();
 			}
-		} else if (isCurrency(type)) {
+			else {
+				return DatatypeConverter.parseDateTime(string).getTime();
+			}
+		}
+		else if (isCurrency(type)) {
 			return Currency.getInstance(string);
-		} else if (type.isEnum()) {
+		}
+		else if (type.isEnum()) {
 			return Enum.valueOf((Class<? extends Enum>) type, string);
-		} else {
+		}
+		else {
 			return string;
 		}
 	}
@@ -185,7 +188,7 @@ public class DataType {
 	 * @see <a href="http://stackoverflow.com/a/29331473/743507">Comparison of regex and char array performance</a>
 	 * @see Character#isDigit Examples for non-ISO-Latin-1-Digits
 	 */
-	public static boolean isIsoLatin1Number(String str) {
+	public static boolean isIsoLatin1Number(final String str) {
 		if (str == null) {
 			return false;
 		}

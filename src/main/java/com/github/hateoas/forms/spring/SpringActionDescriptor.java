@@ -76,6 +76,8 @@ import com.github.hateoas.forms.affordance.DataType;
  */
 public class SpringActionDescriptor implements ActionDescriptor {
 
+	private static final boolean DEBUG_BODY_CREATION = Boolean.getBoolean("body.creation.debug");
+
 	private final String httpMethod;
 
 	private final String actionName;
@@ -404,7 +406,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		// TODO collection, map and object node creation are only describable by an annotation, not via type reflection
 		if (ObjectNode.class.isAssignableFrom(beanType) || Map.class.isAssignableFrom(beanType)
 				|| Collection.class.isAssignableFrom(beanType) || beanType.isArray()) {
-			return; // use @Input(include) to list parameter names, at least? Or mix with hdiv's form builder?
+			return; // use @Input(include) to list parameter names, at least? Or mix with form builder?
 		}
 		try {
 			Constructor<?>[] constructors = beanType.getConstructors();
@@ -414,39 +416,44 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			if (constructor == null) {
 				constructor = PropertyUtils.findJsonCreator(constructors, JsonCreator.class);
 			}
-			Assert.notNull(constructor, "no default constructor or JsonCreator found for type " + beanType.getName());
-			int parameterCount = constructor.getParameterTypes().length;
-
+			if (DEBUG_BODY_CREATION) {
+				System.out.println("no default constructor or JsonCreator found for type " + beanType.getName());
+			}
 			Set<String> knownConstructorFields = new HashSet<String>();
-			if (parameterCount > 0) {
-				Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
+			if (constructor != null) {
+				int parameterCount = constructor.getParameterTypes().length;
 
-				Class<?>[] parameters = constructor.getParameterTypes();
-				int paramIndex = 0;
-				for (Annotation[] annotationsOnParameter : annotationsOnParameters) {
-					for (Annotation annotation : annotationsOnParameter) {
-						if (JsonProperty.class == annotation.annotationType()) {
-							JsonProperty jsonProperty = (JsonProperty) annotation;
+				if (parameterCount > 0) {
+					Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
 
-							// TODO use required attribute of JsonProperty for required fields ->
-							String paramName = jsonProperty.value();
-							Class<?> parameterType = parameters[paramIndex];
-							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
-							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
+					Class<?>[] parameters = constructor.getParameterTypes();
+					int paramIndex = 0;
+					for (Annotation[] annotationsOnParameter : annotationsOnParameters) {
+						for (Annotation annotation : annotationsOnParameter) {
+							if (JsonProperty.class == annotation.annotationType()) {
+								JsonProperty jsonProperty = (JsonProperty) annotation;
 
-							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName, paramName,
-									parameterType, propertyValue, knownConstructorFields, methodHandler, bodyInputParameters);
+								// TODO use required attribute of JsonProperty for required fields ->
+								String paramName = jsonProperty.value();
+								Class<?> parameterType = parameters[paramIndex];
+								Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
+								MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-							if (fieldName != null) {
-								knownConstructorFields.add(fieldName);
+								String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
+										paramName, parameterType, propertyValue, knownConstructorFields, methodHandler,
+										bodyInputParameters);
+
+								if (fieldName != null) {
+									knownConstructorFields.add(fieldName);
+								}
+
+								paramIndex++; // increase for each @JsonProperty
 							}
-
-							paramIndex++; // increase for each @JsonProperty
 						}
 					}
+					Assert.isTrue(parameters.length == paramIndex,
+							"not all constructor arguments of @JsonCreator " + constructor.getName() + " are annotated with @JsonProperty");
 				}
-				Assert.isTrue(parameters.length == paramIndex,
-						"not all constructor arguments of @JsonCreator " + constructor.getName() + " are annotated with @JsonProperty");
 			}
 
 			// TODO support Option provider by other method args?
@@ -457,7 +464,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
 				final Method writeMethod = propertyDescriptor.getWriteMethod();
 				String propertyName = propertyDescriptor.getName();
-
+				if (DEBUG_BODY_CREATION && writeMethod == null) {
+					System.out.println("No write method for:" + parentParamName + propertyName);
+				}
 				if (writeMethod == null || knownFields.contains(parentParamName + propertyName)) {
 					continue;
 				}
@@ -639,7 +648,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private Cardinality getCardinality(final Method invokedMethod, final RequestMethod httpMethod, final Type genericReturnType) {
 		Cardinality cardinality;
 
-		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation((AnnotatedElement)invokedMethod, ResourceHandler.class);
+		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation((AnnotatedElement) invokedMethod, ResourceHandler.class);
 		if (resourceAnn != null) {
 			cardinality = resourceAnn.value();
 		}
