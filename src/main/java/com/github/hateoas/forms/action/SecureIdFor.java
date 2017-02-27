@@ -11,4 +11,6 @@ import java.lang.annotation.Target;
 @Target({ METHOD, PARAMETER })
 public @interface SecureIdFor {
 	Class<?> value();
+
+	boolean realId() default true;
 }
