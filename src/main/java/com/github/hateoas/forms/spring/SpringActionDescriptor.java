@@ -19,6 +19,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -53,6 +54,7 @@ import com.github.hateoas.forms.PropertyUtils;
 import com.github.hateoas.forms.action.Action;
 import com.github.hateoas.forms.action.Cardinality;
 import com.github.hateoas.forms.action.DTOParam;
+import com.github.hateoas.forms.action.Input;
 import com.github.hateoas.forms.action.ResourceHandler;
 import com.github.hateoas.forms.action.Select;
 import com.github.hateoas.forms.affordance.ActionDescriptor;
@@ -439,9 +441,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 								Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 								MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-								String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
-										paramName, parameterType, propertyValue, knownConstructorFields, methodHandler,
-										bodyInputParameters);
+								String fieldName = invokeHandlerOrFollowRecurse(new MethodParameterType(methodParameter),
+										annotatedParameter, parentParamName, paramName, parameterType, propertyValue,
+										knownConstructorFields, methodHandler, bodyInputParameters);
 
 								if (fieldName != null) {
 									knownConstructorFields.add(fieldName);
@@ -462,21 +464,34 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 			// add input field for every setter
 			for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-				final Method writeMethod = propertyDescriptor.getWriteMethod();
 				String propertyName = propertyDescriptor.getName();
+				if (knownFields.contains(parentParamName + propertyName)) {
+					continue;
+				}
+				final Method writeMethod = propertyDescriptor.getWriteMethod();
 				if (DEBUG_BODY_CREATION && writeMethod == null) {
 					System.out.println("No write method for:" + parentParamName + propertyName);
 				}
-				if (writeMethod == null || knownFields.contains(parentParamName + propertyName)) {
+				ActionParameterType type = null;
+				if (writeMethod != null) {
+					Field field = getFormAnnotated(propertyName, beanType);
+					if (field != null) {
+						type = new FieldParameterType(field);
+					}
+					else {
+						MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
+						type = new MethodParameterType(methodParameter);
+					}
+				}
+				if (type == null) {
 					continue;
 				}
 				final Class<?> propertyType = propertyDescriptor.getPropertyType();
 
 				Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, propertyName);
-				MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 
-				invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName, propertyName, propertyType,
-						propertyValue, knownConstructorFields, methodHandler, bodyInputParameters);
+				invokeHandlerOrFollowRecurse(type, annotatedParameter, parentParamName, propertyName, propertyType, propertyValue,
+						knownConstructorFields, methodHandler, bodyInputParameters);
 
 			}
 		}
@@ -485,12 +500,20 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		}
 	}
 
-	private static String invokeHandlerOrFollowRecurse(final MethodParameter methodParameter,
+	private static Field getFormAnnotated(final String fieldName, final Class entity) throws NoSuchFieldException {
+		Field field = entity.getDeclaredField(fieldName);
+		if (field.isAnnotationPresent(Select.class) || field.isAnnotationPresent(Input.class)) {
+			return field;
+		}
+		return null;
+	}
+
+	private static String invokeHandlerOrFollowRecurse(final ActionParameterType methodParameter,
 			final SpringActionInputParameter annotatedParameter, final String parentParamName, final String paramName,
 			final Class<?> parameterType, final Object propertyValue, final Set<String> knownFields,
 			final ActionInputParameterVisitor handler, final List<ActionInputParameter> bodyInputParameters) {
 
-		Annotation[] annotations = methodParameter.getParameterAnnotations();
+		Annotation[] annotations = methodParameter.getAnnotations();
 		String paramPath = parentParamName + paramName;
 		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)
 				|| getParameterAnnotation(annotations, Select.class) != null) {
@@ -551,9 +574,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 							willCardClass = wildCardValue.getClass();
 						}
 						else {
-							Type type = methodParameter.getGenericParameterType();
-							if (type != null && type instanceof ParameterizedType) {
-								willCardClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+							ParameterizedType type = methodParameter.getParameterizedType();
+							if (type != null) {
+								willCardClass = (Class<?>) type.getActualTypeArguments()[0];
 							}
 						}
 						if (willCardClass != null) {

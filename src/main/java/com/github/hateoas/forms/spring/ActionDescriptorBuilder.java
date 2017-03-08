@@ -101,8 +101,8 @@ public class ActionDescriptorBuilder {
 			else {
 				argument = null;
 			}
-			result.put(parameter.getParameterName(),
-					new AnnotableSpringActionInputParameter(parameter, argument, parameter.getParameterName()));
+			result.put(parameter.getParameterName(), new AnnotableSpringActionInputParameter(
+					new MethodParameterType(parameter), argument, parameter.getParameterName()));
 		}
 
 		return result;

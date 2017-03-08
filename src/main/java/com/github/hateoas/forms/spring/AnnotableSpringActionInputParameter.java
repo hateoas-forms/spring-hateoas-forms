@@ -3,7 +3,6 @@ package com.github.hateoas.forms.spring;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -33,23 +32,23 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 
 	private RequestHeader requestHeader;
 
-	private final MethodParameter methodParameter;
+	private final ActionParameterType methodParameter;
 
 	TypeDescriptor typeDescriptor;
 
 	/**
 	 * Creates action input parameter.
 	 *
-	 * @param methodParameter to describe
+	 * @param parameter to describe
 	 * @param value used during sample invocation
 	 * @param conversionService to apply to value
 	 * @param name parameter name.
 	 */
-	public AnnotableSpringActionInputParameter(final MethodParameter methodParameter, final Object value,
+	public AnnotableSpringActionInputParameter(final ActionParameterType parameter, final Object value,
 			final ConversionService conversionService, final String name) {
 		super(name, value, conversionService);
-		this.methodParameter = methodParameter;
-		Annotation[] annotations = methodParameter.getParameterAnnotations();
+		methodParameter = parameter;
+		Annotation[] annotations = parameter.getAnnotations();
 		Input inputAnnotation = null;
 		Select select = null;
 		for (Annotation annotation : annotations) {
@@ -117,11 +116,11 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 		else {
 			fieldType = inputAnnotation.value();
 		}
-		createResolver(methodParameter, select);
+		createResolver(parameter, select);
 
 	}
 
-	public AnnotableSpringActionInputParameter(final MethodParameter methodParameter, final Object value, final String name) {
+	public AnnotableSpringActionInputParameter(final ActionParameterType methodParameter, final Object value, final String name) {
 		this(methodParameter, value, DEFAULT_CONVERSION_SERVICE, name);
 	}
 
@@ -132,12 +131,16 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 	 * @param value during sample method invocation
 	 */
 
-	public AnnotableSpringActionInputParameter(final MethodParameter methodParameter, final Object value) {
+	public AnnotableSpringActionInputParameter(final ActionParameterType methodParameter, final Object value) {
 		this(methodParameter, value, null);
 	}
 
+	public AnnotableSpringActionInputParameter(final MethodParameter reviewBody, final String string) {
+		this(new MethodParameterType(reviewBody), string);
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void createResolver(final MethodParameter methodParameter, final Select select) {
+	private void createResolver(final ActionParameterType methodParameter, final Select select) {
 		Class<?> parameterType = methodParameter.getNestedParameterType();
 		Class<?> nested;
 		SuggestType type = SuggestType.INTERNAL;
@@ -159,7 +162,7 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 			this.type = ParameterType.SELECT;
 		}
 		else if (Collection.class.isAssignableFrom(parameterType)) {
-			TypeDescriptor descriptor = TypeDescriptor.nested(methodParameter, 1);
+			TypeDescriptor descriptor = methodParameter.nested(1);
 			if (descriptor != null) {
 				nested = descriptor.getType();
 				if (Enum.class.isAssignableFrom(nested)) {
@@ -223,16 +226,7 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 	 */
 	@Override
 	public String getParameterName() {
-		String ret;
-		String parameterName = methodParameter.getParameterName();
-		if (parameterName == null) {
-			methodParameter.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-			ret = methodParameter.getParameterName();
-		}
-		else {
-			ret = parameterName;
-		}
-		return ret;
+		return methodParameter.getName();
 	}
 
 	/**
@@ -247,8 +241,7 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 
 	private boolean isEnumType(final Class<?> parameterType) {
 		return Enum[].class.isAssignableFrom(parameterType) || Enum.class.isAssignableFrom(parameterType)
-				|| Collection.class.isAssignableFrom(parameterType)
-						&& Enum.class.isAssignableFrom(TypeDescriptor.nested(methodParameter, 1).getType());
+				|| Collection.class.isAssignableFrom(parameterType) && Enum.class.isAssignableFrom(methodParameter.nested(1).getType());
 	}
 
 	@Override
@@ -299,7 +292,7 @@ public class AnnotableSpringActionInputParameter extends SpringActionInputParame
 
 	private TypeDescriptor getTypeDescriptor() {
 		if (typeDescriptor == null) {
-			typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+			typeDescriptor = methodParameter.nested(0);
 		}
 		return typeDescriptor;
 	}

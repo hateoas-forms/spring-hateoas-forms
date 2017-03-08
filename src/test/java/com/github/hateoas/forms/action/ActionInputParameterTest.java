@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.github.hateoas.forms.spring.AnnotableSpringActionInputParameter;
+import com.github.hateoas.forms.spring.MethodParameterType;
 import com.github.hateoas.forms.spring.SpringActionDescriptor;
 import com.github.hateoas.forms.spring.SpringActionInputParameter;
 
@@ -68,7 +69,8 @@ public class ActionInputParameterTest {
 		MethodParameter rating = new MethodParameter(addReview, 0);
 		MethodParameter reviewBody = new MethodParameter(addReview, 1);
 
-		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(reviewBody, "yada, yada");
+		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(new MethodParameterType(reviewBody),
+				"yada, yada");
 
 		assertTrue(actionInputParameter.hasValue());
 		assertEquals("yada, yada", actionInputParameter.getValue());
@@ -126,7 +128,8 @@ public class ActionInputParameterTest {
 		MethodParameter rating = new MethodParameter(addReview, 0);
 
 		List<String> callValues = Arrays.asList("excellent", "mediocre");
-		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(rating, callValues);
+		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(new MethodParameterType(rating),
+				callValues);
 
 		assertTrue(actionInputParameter.hasValue());
 		assertEquals(callValues, actionInputParameter.getValue());
@@ -167,7 +170,8 @@ public class ActionInputParameterTest {
 		Method setShade = BlueController.class.getMethod("setShade", ShadeOfBlue.class);
 		MethodParameter shade = new MethodParameter(setShade, 0);
 
-		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(new MethodParameterType(shade),
+				ShadeOfBlue.DARK_BLUE);
 
 		assertTrue(actionInputParameter.hasValue());
 		assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());
@@ -204,7 +208,8 @@ public class ActionInputParameterTest {
 		Method setShade = BlueController.class.getMethod("setShade", ShadeOfBlue[].class);
 		MethodParameter shade = new MethodParameter(setShade, 0);
 
-		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(new MethodParameterType(shade),
+				ShadeOfBlue.DARK_BLUE);
 
 		assertTrue(actionInputParameter.hasValue());
 		assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());
@@ -240,7 +245,8 @@ public class ActionInputParameterTest {
 		Method setShade = BlueController.class.getMethod("setShade", List.class);
 		MethodParameter shade = new MethodParameter(setShade, 0);
 
-		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+		SpringActionInputParameter actionInputParameter = new AnnotableSpringActionInputParameter(new MethodParameterType(shade),
+				ShadeOfBlue.DARK_BLUE);
 
 		assertTrue(actionInputParameter.hasValue());
 		assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());

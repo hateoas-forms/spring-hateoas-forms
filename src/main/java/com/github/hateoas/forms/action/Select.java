@@ -24,7 +24,7 @@ import com.github.hateoas.forms.affordance.SuggestType;
  * Specifies possible values for an argument on a controller method.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
+@Target({ ElementType.PARAMETER, ElementType.FIELD })
 public @interface Select {
 
 	/**
