@@ -543,7 +543,10 @@ public class Affordance extends Link {
 	}
 
 	public static boolean isSafe(final String method) {
-		return !(method.equalsIgnoreCase(RequestMethod.POST.toString()) || method.equalsIgnoreCase(RequestMethod.PUT.toString())
-				|| method.equalsIgnoreCase(RequestMethod.PATCH.toString()));
+		return !(method.equalsIgnoreCase(RequestMethod.POST.toString()) || isUpdate(method));
+	}
+
+	public static boolean isUpdate(final String method) {
+		return method.equalsIgnoreCase(RequestMethod.PUT.toString()) || method.equalsIgnoreCase(RequestMethod.PATCH.toString());
 	}
 }
