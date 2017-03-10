@@ -507,6 +507,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				if (field.isAnnotationPresent(Select.class) || field.isAnnotationPresent(Input.class)) {
 					return field;
 				}
+				break;
 			}
 			catch (NoSuchFieldException e) {
 				entity = entity.getSuperclass();
