@@ -500,10 +500,17 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		}
 	}
 
-	private static Field getFormAnnotated(final String fieldName, final Class entity) throws NoSuchFieldException {
-		Field field = entity.getDeclaredField(fieldName);
-		if (field.isAnnotationPresent(Select.class) || field.isAnnotationPresent(Input.class)) {
-			return field;
+	private static Field getFormAnnotated(final String fieldName, Class entity) throws NoSuchFieldException {
+		while (entity != null) {
+			try {
+				Field field = entity.getDeclaredField(fieldName);
+				if (field.isAnnotationPresent(Select.class) || field.isAnnotationPresent(Input.class)) {
+					return field;
+				}
+			}
+			catch (NoSuchFieldException e) {
+				entity = entity.getSuperclass();
+			}
 		}
 		return null;
 	}
