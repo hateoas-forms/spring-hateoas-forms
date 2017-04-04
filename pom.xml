@@ -99,7 +99,12 @@
 			<version>3.0.1</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<!-- Compatibility with 4.18 but use for 4.2 for performance reasons -->
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>4.2.0.RELEASE</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>

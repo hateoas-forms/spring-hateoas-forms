@@ -102,6 +102,18 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private Cardinality cardinality = Cardinality.SINGLE;
 
+	private static boolean SPRING_4_2 = false;
+
+	static {
+		try {
+			AnnotationUtils.class.getMethod("findAnnotation", AnnotatedElement.class, Class.class);
+			SPRING_4_2 = true;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
 	/**
 	 * Creates an {@link ActionDescriptor}.
 	 *
@@ -678,8 +690,13 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private Cardinality getCardinality(final Method invokedMethod, final RequestMethod httpMethod, final Type genericReturnType) {
 		Cardinality cardinality;
-
-		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation((AnnotatedElement) invokedMethod, ResourceHandler.class);
+		ResourceHandler resourceAnn;
+		if (SPRING_4_2) {
+			resourceAnn = AnnotationUtils.findAnnotation((AnnotatedElement) invokedMethod, ResourceHandler.class);
+		}
+		else {
+			resourceAnn = AnnotationUtils.findAnnotation(invokedMethod, ResourceHandler.class);
+		}
 		if (resourceAnn != null) {
 			cardinality = resourceAnn.value();
 		}
