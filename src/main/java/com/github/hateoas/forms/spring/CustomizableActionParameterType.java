@@ -5,7 +5,7 @@ import java.lang.reflect.ParameterizedType;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-public class CustomizableActionParameterType implements ActionParameterType {
+public class CustomizableActionParameterType extends ActionParameterTypeImpl {
 
 	private final String name;
 
@@ -14,6 +14,7 @@ public class CustomizableActionParameterType implements ActionParameterType {
 	private final Annotation[] annotations;
 
 	public CustomizableActionParameterType(final String name, final Class<?> type, final Annotation... annotations) {
+		super(name);
 		this.name = name;
 		this.type = type;
 		this.annotations = annotations;

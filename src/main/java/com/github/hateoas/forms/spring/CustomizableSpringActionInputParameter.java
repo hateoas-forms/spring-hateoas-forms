@@ -36,11 +36,6 @@ public class CustomizableSpringActionInputParameter extends SpringActionInputPar
 	}
 
 	@Override
-	public String getRequestHeaderName() {
-		return null;
-	}
-
-	@Override
 	public boolean isRequired() {
 		return true;
 	}

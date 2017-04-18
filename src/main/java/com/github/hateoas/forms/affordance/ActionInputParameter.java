@@ -25,10 +25,6 @@ public interface ActionInputParameter {
 
 	String READONLY = "readonly";
 
-	String EDITABLE = "editable";
-
-	String REQUIRED = "required";
-
 	/**
 	 * Raw field value, without conversion.
 	 *
@@ -84,13 +80,6 @@ public interface ActionInputParameter {
 	 * @return true if applicable
 	 */
 	boolean isPathVariable();
-
-	/**
-	 * Gets request header name.
-	 *
-	 * @return name
-	 */
-	String getRequestHeaderName();
 
 	/**
 	 * Parameter has input constraints (like range, step etc.)
@@ -197,5 +186,7 @@ public interface ActionInputParameter {
 	void setRequired(boolean required);
 
 	ParameterType getType();
+
+	boolean isReadOnly();
 
 }

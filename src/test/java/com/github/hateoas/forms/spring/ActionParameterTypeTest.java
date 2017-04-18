@@ -35,12 +35,12 @@ public class ActionParameterTypeTest {
 		Field[] fields = ActionParameterTypeTest.class.getFields();
 		List<FieldParameterType> fieldsTypes = new ArrayList<FieldParameterType>();
 		for (Field field : fields) {
-			fieldsTypes.add(new FieldParameterType(field));
+			fieldsTypes.add(new FieldParameterType(field.getName(), field));
 		}
 		Method m = ActionParameterTypeTest.class.getMethod("method", List.class, RequestMethod.class, String.class, String[].class);
 		List<MethodParameterType> mpTypes = new ArrayList<MethodParameterType>();
 		for (int i = 0; i < 4; i++) {
-			mpTypes.add(new MethodParameterType(new MethodParameter(m, i)));
+			mpTypes.add(new MethodParameterType(m.getName(), new MethodParameter(m, i)));
 		}
 
 		for (int i = 0; i < fieldsTypes.size(); i++) {

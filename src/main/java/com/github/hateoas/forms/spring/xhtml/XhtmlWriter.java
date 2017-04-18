@@ -307,6 +307,7 @@ public class XhtmlWriter extends Writer {
 		writeHiddenHttpMethodField(httpMethod);
 		actionDescriptor.accept(new ActionInputParameterVisitor() {
 
+			@Override
 			public void visit(final ActionInputParameter actionInputParameter) {
 				try {
 					List<Suggest<Object>> possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
@@ -507,7 +508,7 @@ public class XhtmlWriter extends Writer {
 			String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, value);
 			// TODO consider @Input-include/exclude/hidden here
 			OptionalAttributes attrs = attr("value", val);
-			if (!(Boolean) actionInputParameter.getInputConstraints().get(ActionInputParameter.EDITABLE)) {
+			if (actionInputParameter.isReadOnly()) {
 				attrs.and(ActionInputParameter.READONLY, ActionInputParameter.READONLY);
 			}
 			if (actionInputParameter.isRequired()) {
@@ -571,7 +572,7 @@ public class XhtmlWriter extends Writer {
 		String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, callValue);
 		writeLabelWithDoc(requestParamName, documentationUrl);
 
-		if (!(Boolean) actionInputParameter.getInputConstraints().get(ActionInputParameter.EDITABLE)) {
+		if (actionInputParameter.isReadOnly()) {
 			attributes.and("disabled", "disabled");
 
 			int items = actualValues.length;

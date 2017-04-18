@@ -8,12 +8,14 @@ import java.util.Arrays;
 
 import org.springframework.core.convert.TypeDescriptor;
 
-public class FieldParameterType implements ActionParameterType {
+public class FieldParameterType extends ActionParameterTypeImpl {
 
 	private final Field field;
 
-	public FieldParameterType(final Field field) {
+	public FieldParameterType(final String paramName, final Field field) {
+		super(paramName);
 		this.field = field;
+		doSetValues();
 	}
 
 	@Override
@@ -90,5 +92,22 @@ public class FieldParameterType implements ActionParameterType {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	@Override
+	public Object getValue(final Object currentObject) {
+		try {
+			if (currentObject != null) {
+				return field.get(currentObject);
+			}
+			return null;
+		}
+		catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return super.getValue(currentObject);
 	}
 }

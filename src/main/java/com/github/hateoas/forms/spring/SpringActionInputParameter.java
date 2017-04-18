@@ -16,23 +16,12 @@ package com.github.hateoas.forms.spring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.github.hateoas.forms.action.Input;
-import com.github.hateoas.forms.action.Options;
-import com.github.hateoas.forms.action.Select;
 import com.github.hateoas.forms.action.Type;
 import com.github.hateoas.forms.affordance.ActionDescriptor;
 import com.github.hateoas.forms.affordance.ActionInputParameter;
@@ -40,6 +29,7 @@ import com.github.hateoas.forms.affordance.DataType;
 import com.github.hateoas.forms.affordance.ParameterType;
 import com.github.hateoas.forms.affordance.Suggest;
 import com.github.hateoas.forms.affordance.SuggestType;
+import com.github.hateoas.forms.spring.ActionParameterTypeImpl.FixedPossibleValuesResolver;
 
 /**
  * Describes a Spring MVC rest services method parameter value with recorded sample call value and input constraints.
@@ -48,27 +38,15 @@ import com.github.hateoas.forms.affordance.SuggestType;
  */
 public abstract class SpringActionInputParameter implements ActionInputParameter {
 
-	private static final String[] EMPTY = new String[0];
-
 	private static final List<Suggest<?>> EMPTY_SUGGEST = Collections.emptyList();
 
 	final Object value;
 
 	private Boolean arrayOrCollection = null;
 
-	private final Map<String, Object> inputConstraints = new HashMap<String, Object>();
-
 	Suggest<?>[] possibleValues;
 
-	String[] excluded = EMPTY;
-
-	String[] readOnly = EMPTY;
-
-	String[] hidden = EMPTY;
-
-	String[] include = EMPTY;
-
-	boolean editable = true;
+	Boolean readOnly;
 
 	ParameterType type = ParameterType.UNKNOWN;
 
@@ -83,6 +61,8 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 
 	private final String name;
 
+	Boolean required;
+
 	protected SpringActionInputParameter(final String name, final Object value, final ConversionService conversionService) {
 		this.name = name;
 		this.conversionService = conversionService;
@@ -91,12 +71,6 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 
 	public static void setDefaultConversionService(final ConversionService conversionService) {
 		DEFAULT_CONVERSION_SERVICE = conversionService;
-	}
-
-	protected void putInputConstraint(final String key, final Object defaultValue, final Object value) {
-		if (!value.equals(defaultValue)) {
-			inputConstraints.put(key, value);
-		}
 	}
 
 	/**
@@ -142,74 +116,33 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	 */
 	@Override
 	public boolean hasInputConstraints() {
-		return !inputConstraints.isEmpty();
+		return !getInputConstraints().isEmpty();
 	}
 
-	/**
-	 * Determines if request body input parameter has a hidden input property.
-	 *
-	 * @param property name or property path
-	 * @return true if hidden
-	 */
-	boolean isHidden(final String property) {
-		return arrayContains(hidden, property);
-	}
-
-	boolean isReadOnly(final String property) {
-		return !editable || arrayContains(readOnly, property);
+	@Override
+	public boolean isReadOnly() {
+		return readOnly != null ? readOnly : false;
 	}
 
 	@Override
 	public void setReadOnly(final boolean readOnly) {
-		editable = !readOnly;
-		putInputConstraint(ActionInputParameter.EDITABLE, "", editable);
+		this.readOnly = readOnly;
 	}
 
 	@Override
 	public void setRequired(final boolean required) {
-		putInputConstraint(ActionInputParameter.REQUIRED, "", required);
-	}
-
-	boolean isIncluded(final String property) {
-		if (isExcluded(property)) {
-			return false;
-		}
-		if (include == null || include.length == 0) {
-			return true;
-		}
-		return containsPropertyIncludeValue(property);
+		this.required = required;
 	}
 
 	/**
-	 * Find out if property is included by searching through all annotations.
+	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and the kind of input
+	 * parameter.
 	 *
-	 * @param property
-	 * @return
+	 * @return true if required
 	 */
-	private boolean containsPropertyIncludeValue(final String property) {
-		return arrayContains(readOnly, property) || arrayContains(hidden, property) || arrayContains(include, property);
-	}
-
-	/**
-	 * Determines if request body input parameter should be excluded, considering {@link Input#exclude}.
-	 *
-	 * @param property name or property path
-	 * @return true if excluded, false if no include statement found or not excluded
-	 */
-	private boolean isExcluded(final String property) {
-		return excluded != null && arrayContains(excluded, property);
-	}
-
-	private boolean arrayContains(final String[] array, final String toFind) {
-		if (array == null || array.length == 0) {
-			return false;
-		}
-		for (String item : array) {
-			if (toFind.equals(item)) {
-				return true;
-			}
-		}
-		return false;
+	@Override
+	public boolean isRequired() {
+		return required != null ? required : false;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -301,7 +234,7 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 	 */
 	@Override
 	public Map<String, Object> getInputConstraints() {
-		return inputConstraints;
+		return Collections.emptyMap();
 	}
 
 	@Override
@@ -325,40 +258,6 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 		return kind + (getParameterName() != null ? " " + getParameterName() : "") + ": " + (value != null ? value.toString() : "no value");
 	}
 
-	private static <T extends Options<V>, V> Options<V> getOptions(final Class<? extends Options<V>> beanType) {
-		Options<V> options = getBean(beanType);
-		if (options == null) {
-			try {
-				options = beanType.newInstance();
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return options;
-	}
-
-	private static <T> T getBean(final Class<T> beanType) {
-		try {
-			RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-			HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-
-			WebApplicationContext context = WebApplicationContextUtils
-					.getWebApplicationContext(servletRequest.getSession().getServletContext());
-			Map<String, T> beans = context.getBeansOfType(beanType);
-			if (!beans.isEmpty()) {
-				return beans.values().iterator().next();
-			}
-		}
-		catch (Exception e) {
-		}
-		return null;
-	}
-
-	public void setExcluded(final String[] excluded) {
-		this.excluded = excluded;
-	}
-
 	@Override
 	public String getName() {
 		return name;
@@ -371,84 +270,6 @@ public abstract class SpringActionInputParameter implements ActionInputParameter
 
 	public void setType(final ParameterType type) {
 		this.type = type;
-	}
-
-	interface PossibleValuesResolver<T> {
-		String[] getParams();
-
-		List<Suggest<T>> getValues(List<?> value);
-
-		SuggestType getType();
-
-		void setType(SuggestType type);
-	}
-
-	class FixedPossibleValuesResolver<T> implements PossibleValuesResolver<T> {
-
-		private final List<Suggest<T>> values;
-
-		private SuggestType type;
-
-		public FixedPossibleValuesResolver(final List<Suggest<T>> values, final SuggestType type) {
-			this.values = values;
-			setType(type);
-		}
-
-		@Override
-		public String[] getParams() {
-			return EMPTY;
-		}
-
-		@Override
-		public List<Suggest<T>> getValues(final List<?> value) {
-			return values;
-		}
-
-		@Override
-		public SuggestType getType() {
-			return type;
-		}
-
-		@Override
-		public void setType(final SuggestType type) {
-			this.type = type;
-		}
-
-	}
-
-	class OptionsPossibleValuesResolver<T> implements PossibleValuesResolver<T> {
-		private final Options<T> options;
-
-		private final Select select;
-
-		private SuggestType type;
-
-		@SuppressWarnings("unchecked")
-		public OptionsPossibleValuesResolver(final Select select) {
-			this.select = select;
-			setType(select.type());
-			options = getOptions((Class<Options<T>>) select.options());
-		}
-
-		@Override
-		public String[] getParams() {
-			return select.args();
-		}
-
-		@Override
-		public List<Suggest<T>> getValues(final List<?> args) {
-			return options.get(select.value(), args.toArray());
-		}
-
-		@Override
-		public SuggestType getType() {
-			return type;
-		}
-
-		@Override
-		public void setType(final SuggestType type) {
-			this.type = type;
-		}
 	}
 
 }

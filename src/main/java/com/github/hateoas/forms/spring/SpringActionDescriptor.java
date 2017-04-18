@@ -14,6 +14,7 @@
 package com.github.hateoas.forms.spring;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -28,7 +29,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -60,7 +60,6 @@ import com.github.hateoas.forms.action.Select;
 import com.github.hateoas.forms.affordance.ActionDescriptor;
 import com.github.hateoas.forms.affordance.ActionInputParameter;
 import com.github.hateoas.forms.affordance.ActionInputParameterVisitor;
-import com.github.hateoas.forms.affordance.DataType;
 
 /**
  * Describes an HTTP method independently of a specific rest framework. Has knowledge about possible request data, i.e. which types and
@@ -77,8 +76,6 @@ import com.github.hateoas.forms.affordance.DataType;
  * @author Dietrich Schulten
  */
 public class SpringActionDescriptor implements ActionDescriptor {
-
-	private static final boolean DEBUG_BODY_CREATION = Boolean.getBoolean("body.creation.debug");
 
 	private final String httpMethod;
 
@@ -99,6 +96,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private ActionInputParameter requestBody;
 
 	private final Map<String, ActionInputParameter> bodyInputParameters = new LinkedHashMap<String, ActionInputParameter>();
+
+	private static final Map<Class<?>, List<ActionParameterType>> parameterInfo = new HashMap<Class<?>, List<ActionParameterType>>();
 
 	private Cardinality cardinality = Cardinality.SINGLE;
 
@@ -312,8 +311,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		this.requestBody = requestBody;
 		if (requestBody != null) {
 			List<ActionInputParameter> bodyInputParameters = new ArrayList<ActionInputParameter>();
-			recurseBeanCreationParams(getRequestBody().getParameterType(), (SpringActionInputParameter) getRequestBody(),
-					getRequestBody().getValue(), "", Collections.<String> emptySet(), new ActionInputParameterVisitor() {
+			recurseBeanCreationParams(requestBody.getParameterType(), (SpringActionInputParameter) requestBody, requestBody.getValue(), "",
+					new HashSet<String>(), new ActionInputParameterVisitor() {
 
 						@Override
 						public void visit(final ActionInputParameter inputParameter) {
@@ -404,6 +403,96 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	}
 
+	static List<ActionParameterType> findConstructorInfo(final Class<?> beanType) {
+		List<ActionParameterType> parametersInfo = new ArrayList<ActionParameterType>();
+		Constructor<?>[] constructors = beanType.getConstructors();
+		// find default ctor
+		Constructor<?> constructor = PropertyUtils.findDefaultCtor(constructors);
+		// find ctor with JsonCreator ann
+		if (constructor == null) {
+			constructor = PropertyUtils.findJsonCreator(constructors, JsonCreator.class);
+		}
+		if (constructor != null) {
+			int parameterCount = constructor.getParameterTypes().length;
+
+			if (parameterCount > 0) {
+				Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
+
+				Class<?>[] parameters = constructor.getParameterTypes();
+				int paramIndex = 0;
+				for (Annotation[] annotationsOnParameter : annotationsOnParameters) {
+					for (Annotation annotation : annotationsOnParameter) {
+						if (JsonProperty.class == annotation.annotationType()) {
+							JsonProperty jsonProperty = (JsonProperty) annotation;
+
+							// TODO use required attribute of JsonProperty for required fields ->
+							String paramName = jsonProperty.value();
+							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
+
+							parametersInfo.add(new MethodParameterType(paramName, methodParameter));
+
+							paramIndex++; // increase for each @JsonProperty
+						}
+					}
+				}
+				Assert.isTrue(parameters.length == paramIndex,
+						"not all constructor arguments of @JsonCreator " + constructor.getName() + " are annotated with @JsonProperty");
+			}
+		}
+		return parametersInfo;
+	}
+
+	static List<ActionParameterType> findBeanInfo(final Class<?> beanType, final List<ActionParameterType> previous)
+			throws IntrospectionException, NoSuchFieldException {
+		// TODO support Option provider by other method args?
+		final BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
+		final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+
+		// add input field for every setter
+		for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+			String propertyName = propertyDescriptor.getName();
+
+			if (isDefinedAlready(propertyName, previous)) {
+				continue;
+			}
+			final Method writeMethod = propertyDescriptor.getWriteMethod();
+			ActionParameterType type = null;
+			if (writeMethod != null) {
+				Field field = getFormAnnotated(propertyName, beanType);
+				if (field != null) {
+					type = new FieldParameterType(propertyName, field);
+				}
+				else {
+					MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
+					type = new MethodParameterType(propertyName, methodParameter, propertyDescriptor.getReadMethod());
+				}
+			}
+			if (type == null) {
+				continue;
+			}
+			previous.add(type);
+		}
+		return previous;
+	}
+
+	private static boolean isDefinedAlready(final String propertyName, final List<ActionParameterType> previous) {
+		for (ActionParameterType actionInputParameterInfo : previous) {
+			if (actionInputParameterInfo.getParamName().equals(propertyName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static List<ActionParameterType> getClassInfo(final Class<?> beanType) throws IntrospectionException, NoSuchFieldException {
+		List<ActionParameterType> info = parameterInfo.get(beanType);
+		if (info == null) {
+			info = findBeanInfo(beanType, findConstructorInfo(beanType));
+			parameterInfo.put(beanType, info);
+		}
+		return info;
+	}
+
 	/**
 	 * Renders input fields for bean properties of bean to add or update or patch.
 	 *
@@ -423,88 +512,16 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			return; // use @Input(include) to list parameter names, at least? Or mix with form builder?
 		}
 		try {
-			Constructor<?>[] constructors = beanType.getConstructors();
-			// find default ctor
-			Constructor<?> constructor = PropertyUtils.findDefaultCtor(constructors);
-			// find ctor with JsonCreator ann
-			if (constructor == null) {
-				constructor = PropertyUtils.findJsonCreator(constructors, JsonCreator.class);
-			}
-			if (DEBUG_BODY_CREATION) {
-				System.out.println("no default constructor or JsonCreator found for type " + beanType.getName());
-			}
-			Set<String> knownConstructorFields = new HashSet<String>();
-			if (constructor != null) {
-				int parameterCount = constructor.getParameterTypes().length;
 
-				if (parameterCount > 0) {
-					Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
+			List<ActionParameterType> parameterInfo = getClassInfo(beanType);
 
-					Class<?>[] parameters = constructor.getParameterTypes();
-					int paramIndex = 0;
-					for (Annotation[] annotationsOnParameter : annotationsOnParameters) {
-						for (Annotation annotation : annotationsOnParameter) {
-							if (JsonProperty.class == annotation.annotationType()) {
-								JsonProperty jsonProperty = (JsonProperty) annotation;
+			for (int i = 0; i < parameterInfo.size(); i++) {
+				ActionParameterType info = parameterInfo.get(i);
+				Object propertyValue = info.getValue(currentCallValue);
 
-								// TODO use required attribute of JsonProperty for required fields ->
-								String paramName = jsonProperty.value();
-								Class<?> parameterType = parameters[paramIndex];
-								Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
-								MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
-
-								String fieldName = invokeHandlerOrFollowRecurse(new MethodParameterType(methodParameter),
-										annotatedParameter, parentParamName, paramName, parameterType, propertyValue,
-										knownConstructorFields, methodHandler, bodyInputParameters);
-
-								if (fieldName != null) {
-									knownConstructorFields.add(fieldName);
-								}
-
-								paramIndex++; // increase for each @JsonProperty
-							}
-						}
-					}
-					Assert.isTrue(parameters.length == paramIndex,
-							"not all constructor arguments of @JsonCreator " + constructor.getName() + " are annotated with @JsonProperty");
-				}
-			}
-
-			// TODO support Option provider by other method args?
-			final BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
-			final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-
-			// add input field for every setter
-			for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-				String propertyName = propertyDescriptor.getName();
-				if (knownFields.contains(parentParamName + propertyName)) {
-					continue;
-				}
-				final Method writeMethod = propertyDescriptor.getWriteMethod();
-				if (DEBUG_BODY_CREATION && writeMethod == null) {
-					System.out.println("No write method for:" + parentParamName + propertyName);
-				}
-				ActionParameterType type = null;
-				if (writeMethod != null) {
-					Field field = getFormAnnotated(propertyName, beanType);
-					if (field != null) {
-						type = new FieldParameterType(field);
-					}
-					else {
-						MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
-						type = new MethodParameterType(methodParameter);
-					}
-				}
-				if (type == null) {
-					continue;
-				}
-				final Class<?> propertyType = propertyDescriptor.getPropertyType();
-
-				Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, propertyName);
-
-				invokeHandlerOrFollowRecurse(type, annotatedParameter, parentParamName, propertyName, propertyType, propertyValue,
-						knownConstructorFields, methodHandler, bodyInputParameters);
-
+				String value = invokeHandlerOrFollowRecurse(annotatedParameter, parentParamName, knownFields, methodHandler,
+						bodyInputParameters, propertyValue, info);
+				knownFields.add(value);
 			}
 		}
 		catch (Exception e) {
@@ -512,10 +529,11 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		}
 	}
 
-	private static Field getFormAnnotated(final String fieldName, Class entity) throws NoSuchFieldException {
+	private static Field getFormAnnotated(final String fieldName, Class<?> entity) throws NoSuchFieldException {
 		while (entity != null) {
 			try {
 				Field field = entity.getDeclaredField(fieldName);
+				field.setAccessible(true);
 				if (field.isAnnotationPresent(Select.class) || field.isAnnotationPresent(Input.class)) {
 					return field;
 				}
@@ -528,33 +546,30 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		return null;
 	}
 
-	private static String invokeHandlerOrFollowRecurse(final ActionParameterType methodParameter,
-			final SpringActionInputParameter annotatedParameter, final String parentParamName, final String paramName,
-			final Class<?> parameterType, final Object propertyValue, final Set<String> knownFields,
-			final ActionInputParameterVisitor handler, final List<ActionInputParameter> bodyInputParameters) {
-
-		Annotation[] annotations = methodParameter.getAnnotations();
+	private static String invokeHandlerOrFollowRecurse(final SpringActionInputParameter annotatedParameter, final String parentParamName,
+			final Set<String> knownFields, final ActionInputParameterVisitor handler, final List<ActionInputParameter> bodyInputParameters,
+			final Object propertyValue, final ActionParameterType info) {
+		String paramName = info.getParamName();
+		ActionParameterType parameterType = info;
 		String paramPath = parentParamName + paramName;
-		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)
-				|| getParameterAnnotation(annotations, Select.class) != null) {
+		if (info.isSingleValue()) {
 			/**
 			 * TODO This is a temporal patch, to be reviewed...
 			 */
 			if (annotatedParameter == null) {
-				ActionInputParameter inputParameter = new AnnotableSpringActionInputParameter(methodParameter, propertyValue,
-						parentParamName + paramName);
+				ActionInputParameter inputParameter = new AnnotableSpringActionInputParameter(parameterType, propertyValue, paramPath);
 				bodyInputParameters.add(inputParameter);
 				handler.visit(inputParameter);
 				return inputParameter.getName();
 			}
-			else if (annotatedParameter.isIncluded(paramPath) && !knownFields.contains(parentParamName + paramName)) {
-				DTOParam dtoAnnotation = getParameterAnnotation(annotations, DTOParam.class);
+			else if (!knownFields.contains(parentParamName + paramName)) {
+				DTOParam dtoAnnotation = info.getDTOParam();
 				StringBuilder sb = new StringBuilder(64);
-				if (DataType.isArrayOrCollection(parameterType) && dtoAnnotation != null) {
+				if (info.isArrayOrCollection() && dtoAnnotation != null) {
 					Object wildCardValue = null;
 					if (propertyValue != null) {
 						// if the element is wildcard dto type element we need to get the first value
-						if (parameterType.isArray()) {
+						if (info.isArray()) {
 							Object[] array = (Object[]) propertyValue;
 							if (!dtoAnnotation.wildcard()) {
 								for (int i = 0; i < array.length; i++) {
@@ -594,7 +609,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 							willCardClass = wildCardValue.getClass();
 						}
 						else {
-							ParameterizedType type = methodParameter.getParameterizedType();
+							ParameterizedType type = parameterType.getParameterizedType();
 							if (type != null) {
 								willCardClass = (Class<?>) type.getActualTypeArguments()[0];
 							}
@@ -608,18 +623,13 @@ public class SpringActionDescriptor implements ActionDescriptor {
 					return parentParamName + paramName;
 				}
 				else {
-					SpringActionInputParameter inputParameter = new AnnotableSpringActionInputParameter(methodParameter, propertyValue,
-							parentParamName + paramName);
+					SpringActionInputParameter inputParameter = new AnnotableSpringActionInputParameter(parameterType, propertyValue,
+							paramPath);
 					// TODO We need to find a better solution for this
 					inputParameter.possibleValues = annotatedParameter.possibleValues;
 					bodyInputParameters.add(inputParameter);
 					handler.visit(inputParameter);
-					if (annotatedParameter.isReadOnly(paramPath)) {
-						inputParameter.setReadOnly(true);
-					}
-					if (annotatedParameter.isHidden(paramPath)) {
-						inputParameter.setHtmlInputFieldType(com.github.hateoas.forms.action.Type.HIDDEN);
-					}
+
 					return inputParameter.getName();
 				}
 			}
@@ -633,8 +643,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			else {
 				callValueBean = propertyValue;
 			}
-			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, parentParamName + paramName + ".", knownFields,
-					handler, bodyInputParameters);
+			recurseBeanCreationParams(info.getParameterType(), annotatedParameter, callValueBean, paramPath + ".", knownFields, handler,
+					bodyInputParameters);
 		}
 
 		return null;
@@ -763,16 +773,6 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	@Override
 	public String toString() {
 		return "SpringActionDescriptor [httpMethod=" + httpMethod + ", actionName=" + actionName + "]";
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Annotation> T getParameterAnnotation(final Annotation[] anns, final Class<T> annotationType) {
-		for (Annotation ann : anns) {
-			if (annotationType.isInstance(ann)) {
-				return (T) ann;
-			}
-		}
-		return null;
 	}
 
 }

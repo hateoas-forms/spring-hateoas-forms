@@ -29,7 +29,8 @@ public class HalFormsUtils {
 			process(rs, links, templates, objectMapper);
 			return new HalFormsDocument(links, templates);
 
-		} else { // bean
+		}
+		else { // bean
 			return object;
 		}
 	}
@@ -44,7 +45,8 @@ public class HalFormsUtils {
 					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
 					if (i == 0) {
 						links.add(affordance);
-					} else {
+					}
+					else {
 						String key = actionDescriptor.getSemanticActionType();
 						if (true || actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = templates.isEmpty() ? new Template()
@@ -61,23 +63,21 @@ public class HalFormsUtils {
 						}
 					}
 				}
-			} else {
+			}
+			else {
 				links.add(link);
 			}
 		}
 
 	}
 
-	public static Property getProperty(final ActionInputParameter actionInputParameter,
-			final ActionDescriptor actionDescriptor, final Object propertyValue, final String name,
-			final ObjectMapper objectMapper) {
+	public static Property getProperty(final ActionInputParameter actionInputParameter, final ActionDescriptor actionDescriptor,
+			final Object propertyValue, final String name, final ObjectMapper objectMapper) {
 		Map<String, Object> inputConstraints = actionInputParameter.getInputConstraints();
 
-		boolean readOnly = inputConstraints.containsKey(ActionInputParameter.EDITABLE)
-				? !((Boolean) inputConstraints.get(ActionInputParameter.EDITABLE)) : true;
+		boolean readOnly = actionInputParameter.isReadOnly();
 		String regex = (String) inputConstraints.get(ActionInputParameter.PATTERN);
-		boolean required = inputConstraints.containsKey(ActionInputParameter.REQUIRED)
-				? (Boolean) inputConstraints.get(ActionInputParameter.REQUIRED) : false;
+		boolean required = actionInputParameter.isRequired();
 
 		String value = null;
 
@@ -91,11 +91,14 @@ public class HalFormsUtils {
 				if (propertyValue != null) {
 					if (propertyValue.getClass().isEnum()) {
 						value = propertyValue.toString();
-					} else {
+					}
+					else {
 						value = objectMapper.writeValueAsString(propertyValue);
 					}
 				}
-			} catch (JsonProcessingException e) {}
+			}
+			catch (JsonProcessingException e) {
+			}
 
 			if (actionInputParameter.isArrayOrCollection()) {
 				multi = true;
@@ -109,15 +112,19 @@ public class HalFormsUtils {
 				valueField = possibleValue.getValueField();
 			}
 			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
-		} else {
+		}
+		else {
 			if (propertyValue != null) {
 				try {
 					if (propertyValue instanceof List || propertyValue.getClass().isArray()) {
 						value = objectMapper.writeValueAsString(propertyValue);
-					} else {
+					}
+					else {
 						value = propertyValue.toString();
 					}
-				} catch (JsonProcessingException e) {}
+				}
+				catch (JsonProcessingException e) {
+				}
 			}
 		}
 
@@ -141,8 +148,8 @@ public class HalFormsUtils {
 
 		@Override
 		public void visit(final ActionInputParameter inputParameter) {
-			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(),
-					inputParameter.getName(), objectMapper);
+			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(), inputParameter.getName(),
+					objectMapper);
 
 			template.getProperties().add(property);
 		}

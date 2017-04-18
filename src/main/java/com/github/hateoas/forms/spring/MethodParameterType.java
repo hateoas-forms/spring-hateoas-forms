@@ -1,6 +1,8 @@
 package com.github.hateoas.forms.spring;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -9,12 +11,49 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 
-public class MethodParameterType implements ActionParameterType {
+public class MethodParameterType extends ActionParameterTypeImpl {
 
-	MethodParameter methodParameter;
+	private final MethodParameter methodParameter;
 
-	public MethodParameterType(final MethodParameter methodParameter) {
+	private final Method getter;
+
+	public MethodParameterType(final String paramName, final MethodParameter methodParameter) {
+		this(paramName, methodParameter, null);
+	}
+
+	public MethodParameterType(final String paramName, final MethodParameter methodParameter, final Method getter) {
+		super(paramName);
 		this.methodParameter = methodParameter;
+		this.getter = getter;
+		if (getter != null) {
+			this.getter.setAccessible(true);
+		}
+		doSetValues();
+	}
+
+	@Override
+	public Object getValue(final Object currentObject) {
+		if (getter != null) {
+			try {
+				if (currentObject != null) {
+					return getter.invoke(currentObject, (Object[]) null);
+				}
+				return null;
+			}
+			catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return super.getValue(currentObject);
 	}
 
 	@Override
